@@ -108,7 +108,8 @@ export const BugReportKeys = {
 } as const;
 
 // ─── Types ──────────────────────────────────────────────────────────────────
-export type ValidationKey = (typeof ValidationKeys)[keyof typeof ValidationKeys];
+export type ValidationKey =
+  (typeof ValidationKeys)[keyof typeof ValidationKeys];
 export type AccountKey = (typeof AccountKeys)[keyof typeof AccountKeys];
 export type AdminKey = (typeof AdminKeys)[keyof typeof AdminKeys];
 export type TaskKey = (typeof TaskKeys)[keyof typeof TaskKeys];

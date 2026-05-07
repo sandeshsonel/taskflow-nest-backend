@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsIn, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
 import { Match } from '../../../common/decorators/match.decorator';
 import { ValidationKeys } from '../../../common/constants/validation-messages';
@@ -22,7 +29,9 @@ export class CreateAccountDto {
   /** Account role — defaults to "user" when omitted. */
   @ApiPropertyOptional({ enum: ['user', 'admin'], default: 'user' })
   @IsOptional()
-  @IsIn(['user', 'admin'], { message: i18nValidationMessage(ValidationKeys.ROLE_INVALID) })
+  @IsIn(['user', 'admin'], {
+    message: i18nValidationMessage(ValidationKeys.ROLE_INVALID),
+  })
   role?: 'user' | 'admin';
 
   /** Password (min 7 characters). */
@@ -34,6 +43,8 @@ export class CreateAccountDto {
   /** Must match the password field exactly. */
   @ApiProperty({ example: 'P@ssw0rd', format: 'password' })
   @IsString({ message: i18nValidationMessage(ValidationKeys.INVALID_TYPE) })
-  @Match('password', { message: i18nValidationMessage(ValidationKeys.PASSWORD_MISMATCH) })
+  @Match('password', {
+    message: i18nValidationMessage(ValidationKeys.PASSWORD_MISMATCH),
+  })
   confirmPassword: string;
 }

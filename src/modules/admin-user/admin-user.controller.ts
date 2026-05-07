@@ -28,7 +28,7 @@ import { InternalThrottle } from '../../common/throttler/throttler.decorators';
 @Controller('admin-user')
 @ApiBearerAuth('JWT-auth')
 export class AdminUserController {
-  constructor(private readonly adminUserService: AdminUserService) { }
+  constructor(private readonly adminUserService: AdminUserService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get list of users for the admin' })

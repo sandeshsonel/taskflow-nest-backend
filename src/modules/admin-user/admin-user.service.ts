@@ -1,38 +1,54 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { AdminUser, AdminUserDocument } from './schemas/admin-user.schema';
 import { User, UserDocument } from '../account/schemas/user.schema';
-import { Notifications, NotificationDocument } from '../notification/schemas/notification.schema';
+import {
+  Notifications,
+  NotificationDocument,
+} from '../notification/schemas/notification.schema';
 import { Task, TaskDocument } from '../task/schemas/task.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { getLastNDays, percentChange } from '../../utils';
 import { I18nService } from 'nestjs-i18n';
-import { AdminKeys, AccountKeys } from '../../common/constants/validation-messages';
+import {
+  AdminKeys,
+  AccountKeys,
+} from '../../common/constants/validation-messages';
 import { WinstonLoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class AdminUserService {
   constructor(
-    @InjectModel(AdminUser.name) private adminUserModel: Model<AdminUserDocument>,
+    @InjectModel(AdminUser.name)
+    private adminUserModel: Model<AdminUserDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    @InjectModel(Notifications.name) private notificationModel: Model<NotificationDocument>,
+    @InjectModel(Notifications.name)
+    private notificationModel: Model<NotificationDocument>,
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     private readonly i18n: I18nService,
     private readonly logger: WinstonLoggerService,
-  ) { }
+  ) {}
 
   async getUsersList(adminId: string) {
-    const adminUser = await this.adminUserModel.findOne({ adminId }).select([
-      '-users.password',
-      '-__v',
-    ]);
+    const adminUser = await this.adminUserModel
+      .findOne({ adminId })
+      .select(['-users.password', '-__v']);
     return adminUser?.users || [];
   }
 
-  async createUser(adminId: string, adminEmail: string, adminFullName: string, createUserDto: CreateUserDto) {
+  async createUser(
+    adminId: string,
+    adminEmail: string,
+    adminFullName: string,
+    createUserDto: CreateUserDto,
+  ) {
     const { firstName, lastName, email, role, password } = createUserDto;
 
     if (adminEmail === email) {
@@ -41,7 +57,9 @@ export class AdminUserService {
 
     const existingUser = await this.userModel.findOne({ email });
     if (existingUser && existingUser.role === 'admin') {
-      throw new BadRequestException(this.i18n.t(AdminKeys.ADMIN_ALREADY_REGISTERED));
+      throw new BadRequestException(
+        this.i18n.t(AdminKeys.ADMIN_ALREADY_REGISTERED),
+      );
     }
 
     const isAlreadyInAdminUsers = await this.adminUserModel.findOne({
@@ -49,7 +67,9 @@ export class AdminUserService {
     });
 
     if (isAlreadyInAdminUsers) {
-      throw new BadRequestException(this.i18n.t(AccountKeys.EMAIL_ALREADY_REGISTERED));
+      throw new BadRequestException(
+        this.i18n.t(AccountKeys.EMAIL_ALREADY_REGISTERED),
+      );
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -82,7 +102,9 @@ export class AdminUserService {
       const lastAddedUser = adminUser?.users[adminUser.users.length - 1];
 
       const notificationData = {
-        message: this.i18n.t(AdminKeys.USER_INVITE_NOTIFICATION, { args: { adminName: adminFullName } }),
+        message: this.i18n.t(AdminKeys.USER_INVITE_NOTIFICATION, {
+          args: { adminName: adminFullName },
+        }),
         actionType: 'invite',
         actionData: {
           adminId: String(adminId),
@@ -103,7 +125,11 @@ export class AdminUserService {
     }
   }
 
-  async updateUser(adminId: string, userId: string, updateUserDto: UpdateUserDto) {
+  async updateUser(
+    adminId: string,
+    userId: string,
+    updateUserDto: UpdateUserDto,
+  ) {
     const isUserExists = await this.adminUserModel.findOne({
       adminId,
       'users._id': userId,
@@ -163,16 +189,21 @@ export class AdminUserService {
       }
 
       const users = admin.users;
-      const normalUserIds = users.map((u: any) => u.userId).filter(id => id != null);
+      const normalUserIds = users
+        .map((u: any) => u.userId)
+        .filter((id) => id != null);
 
       const totalUsers = users.length;
       const currentNewSignups = users.filter(
         (u: any) => u.joinedAt && u.joinedAt >= last7Days,
       ).length;
       const previousNewSignups = users.filter(
-        (u: any) => u.joinedAt && u.joinedAt >= prev14Days && u.joinedAt < last7Days,
+        (u: any) =>
+          u.joinedAt && u.joinedAt >= prev14Days && u.joinedAt < last7Days,
       ).length;
-      const usersLastWeek = users.filter((u: any) => u.joinedAt && u.joinedAt < last7Days).length;
+      const usersLastWeek = users.filter(
+        (u: any) => u.joinedAt && u.joinedAt < last7Days,
+      ).length;
 
       // ACTIVE TASKS NOW
       const activeTasksNow = await this.taskModel.aggregate([
@@ -233,14 +264,23 @@ export class AdminUserService {
         totalUsers,
         totalUsersChange: percentChange(totalUsers, usersLastWeek),
         activeTasks: activeTasksCount,
-        activeTasksChange: percentChange(activeTasksCount, activeTasksPrevCount),
+        activeTasksChange: percentChange(
+          activeTasksCount,
+          activeTasksPrevCount,
+        ),
         completedThisWeek: completedThisWeekCount,
-        completedThisWeekChange: percentChange(completedThisWeekCount, completedLastWeekCount),
+        completedThisWeekChange: percentChange(
+          completedThisWeekCount,
+          completedLastWeekCount,
+        ),
         newSignups: currentNewSignups,
         newSignupsChange: percentChange(currentNewSignups, previousNewSignups),
       };
     } catch (error) {
-      this.logger.error('Error fetching dashboard stats in AdminUserService:', error);
+      this.logger.error(
+        'Error fetching dashboard stats in AdminUserService:',
+        error,
+      );
       throw error;
     }
   }

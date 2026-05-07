@@ -12,11 +12,17 @@ import { JwtService } from '@nestjs/jwt';
 import { I18nService } from 'nestjs-i18n';
 
 import { User, UserDocument } from './schemas/user.schema';
-import { AdminUser, AdminUserDocument } from '../admin-user/schemas/admin-user.schema';
+import {
+  AdminUser,
+  AdminUserDocument,
+} from '../admin-user/schemas/admin-user.schema';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { LoginDto } from './dto/login.dto';
 import { GoogleAuthDto } from './dto/google-auth.dto';
-import { AccountKeys, CommonKeys } from '../../common/constants/validation-messages';
+import {
+  AccountKeys,
+  CommonKeys,
+} from '../../common/constants/validation-messages';
 import admin from '../../utils/firebase';
 import { WinstonLoggerService } from '../logger/logger.service';
 
@@ -24,11 +30,12 @@ import { WinstonLoggerService } from '../logger/logger.service';
 export class AccountService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    @InjectModel(AdminUser.name) private adminUserModel: Model<AdminUserDocument>,
+    @InjectModel(AdminUser.name)
+    private adminUserModel: Model<AdminUserDocument>,
     private jwtService: JwtService,
     private readonly i18n: I18nService,
     private readonly logger: WinstonLoggerService,
-  ) { }
+  ) {}
 
   async signup(createAccountDto: CreateAccountDto) {
     const { name, email, password, role } = createAccountDto;
@@ -105,9 +112,7 @@ export class AccountService {
     const { idToken, role } = googleAuthDto;
     try {
       if (!idToken) {
-        throw new BadRequestException(
-          this.i18n.t(CommonKeys.TOKEN_MISSING),
-        );
+        throw new BadRequestException(this.i18n.t(CommonKeys.TOKEN_MISSING));
       }
 
       const decodedToken = await admin.auth().verifyIdToken(idToken);
@@ -123,7 +128,9 @@ export class AccountService {
       const isUser = role === 'user';
 
       if (isUser) {
-        const isAdminUser = await this.adminUserModel.findOne({ 'users.email': email });
+        const isAdminUser = await this.adminUserModel.findOne({
+          'users.email': email,
+        });
         if (isAdminUser) {
           throw new BadRequestException(
             this.i18n.t(AccountKeys.EMAIL_REGISTERED_CONTACT_ADMIN),
@@ -182,9 +189,7 @@ export class AccountService {
     }
 
     if (account.status === 'suspended') {
-      throw new BadRequestException(
-        this.i18n.t(AccountKeys.ACCOUNT_SUSPENDED),
-      );
+      throw new BadRequestException(this.i18n.t(AccountKeys.ACCOUNT_SUSPENDED));
     }
 
     const isMatch = await bcrypt.compare(password, account.password);
@@ -221,9 +226,7 @@ export class AccountService {
 
     try {
       if (!idToken) {
-        throw new BadRequestException(
-          this.i18n.t(CommonKeys.TOKEN_MISSING),
-        );
+        throw new BadRequestException(this.i18n.t(CommonKeys.TOKEN_MISSING));
       }
 
       const decodedToken = await admin.auth().verifyIdToken(idToken);
@@ -231,19 +234,16 @@ export class AccountService {
       const user = await this.userModel.findOne({ email: decodedToken.email });
 
       if (!user) {
-        throw new BadRequestException(
-          this.i18n.t(AccountKeys.USER_NOT_FOUND),
-        );
+        throw new BadRequestException(this.i18n.t(AccountKeys.USER_NOT_FOUND));
       }
 
-      const token = await this.jwtService.signAsync(
-        {
-          id: user._id,
-          fullName: user.fullName,
-          email: user.email,
-          firebaseUID: user.firebaseUID ?? null,
-          role: user.role,
-        });
+      const token = await this.jwtService.signAsync({
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        firebaseUID: user.firebaseUID ?? null,
+        role: user.role,
+      });
 
       return {
         message: this.i18n.t(AccountKeys.SIGNIN_SUCCESS),

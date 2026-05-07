@@ -23,7 +23,7 @@ export class TaskService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private readonly i18n: I18nService,
     private readonly logger: WinstonLoggerService,
-  ) { }
+  ) {}
 
   async getTaskById(taskId: string, userId: string) {
     const userTask = await this.taskModel.findOne(
@@ -206,7 +206,9 @@ export class TaskService {
       for (const [key, value] of Object.entries(updateTaskDto)) {
         if (value !== undefined) {
           if (key === 'assignTo' && value) {
-            updateFields[`tasks.$.${key}`] = new Types.ObjectId(value as string);
+            updateFields[`tasks.$.${key}`] = new Types.ObjectId(
+              value as string,
+            );
           } else {
             updateFields[`tasks.$.${key}`] = value;
           }

@@ -10,7 +10,9 @@ export class GoogleAuthDto {
     description: 'Firebase ID token from the client-side Google sign-in',
   })
   @IsString({ message: i18nValidationMessage(ValidationKeys.INVALID_TYPE) })
-  @IsNotEmpty({ message: i18nValidationMessage(ValidationKeys.ID_TOKEN_REQUIRED) })
+  @IsNotEmpty({
+    message: i18nValidationMessage(ValidationKeys.ID_TOKEN_REQUIRED),
+  })
   idToken: string;
 
   /** Optional role assignment (defaults to "user"). */

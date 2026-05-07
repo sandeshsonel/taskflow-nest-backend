@@ -25,7 +25,7 @@ import {
   JwtAuthGuard,
   AdminUserModule,
   NotificationModule,
-  LoggerModule
+  LoggerModule,
 } from '@modules';
 import { CustomThrottlerGuard } from './common/throttler/throttler.guard';
 
@@ -37,7 +37,7 @@ const FEATURE_MODULES = [
   HealthModule,
   AdminUserModule,
   NotificationModule,
-  LoggerModule
+  LoggerModule,
 ];
 
 import { configs, validate } from './config';
@@ -96,11 +96,11 @@ const environment = process.env.NODE_ENV || 'development';
         ],
         storage: config.get('throttler.redis.enabled')
           ? new ThrottlerStorageRedisService(
-            new Redis({
-              host: config.get('throttler.redis.host'),
-              port: config.get('throttler.redis.port'),
-            }),
-          )
+              new Redis({
+                host: config.get('throttler.redis.host'),
+                port: config.get('throttler.redis.port'),
+              }),
+            )
           : undefined,
       }),
     }),
@@ -118,4 +118,4 @@ const environment = process.env.NODE_ENV || 'development';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

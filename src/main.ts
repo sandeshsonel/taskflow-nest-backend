@@ -1,9 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import {
-  I18nValidationExceptionFilter,
-  I18nValidationPipe,
-} from 'nestjs-i18n';
+import { I18nValidationExceptionFilter, I18nValidationPipe } from 'nestjs-i18n';
 
 import { AppModule } from './app.module';
 import { setupSwagger } from './common/swagger/swagger.config';

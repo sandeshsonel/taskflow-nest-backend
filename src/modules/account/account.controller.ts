@@ -18,21 +18,34 @@ import { CreateAccountDto } from './dto/create-account.dto';
 import { LoginDto } from './dto/login.dto';
 import { GoogleAuthDto } from './dto/google-auth.dto';
 import { Public, CurrentUser } from '../auth';
-import { StrictThrottle, RegistrationThrottle } from '../../common/throttler/throttler.decorators';
+import {
+  StrictThrottle,
+  RegistrationThrottle,
+} from '../../common/throttler/throttler.decorators';
 
 @ApiTags('Account')
 @Controller('account')
 export class AccountController {
-  constructor(private readonly accountService: AccountService) { }
+  constructor(private readonly accountService: AccountService) {}
 
   @Public()
   @RegistrationThrottle()
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new account', description: 'Creates a new user with email/password credentials and returns a JWT.' })
-  @ApiResponse({ status: 429, description: 'Too many registration attempts. Please try again in an hour.' })
+  @ApiOperation({
+    summary: 'Register a new account',
+    description:
+      'Creates a new user with email/password credentials and returns a JWT.',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many registration attempts. Please try again in an hour.',
+  })
   @ApiResponse({ status: 201, description: 'Account created successfully.' })
-  @ApiResponse({ status: 400, description: 'Validation error or email already registered.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error or email already registered.',
+  })
   @ApiResponse({ status: 500, description: 'Internal server error.' })
   @ApiBody({ type: CreateAccountDto })
   async signup(@Body() createAccountDto: CreateAccountDto) {
@@ -43,10 +56,23 @@ export class AccountController {
   @RegistrationThrottle()
   @Post('signup/google')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register via Google', description: 'Creates a new user from a Firebase Google ID token and returns a JWT.' })
-  @ApiResponse({ status: 429, description: 'Too many registration attempts. Please try again in an hour.' })
-  @ApiResponse({ status: 201, description: 'Account created successfully via Google.' })
-  @ApiResponse({ status: 400, description: 'Invalid token or user already exists.' })
+  @ApiOperation({
+    summary: 'Register via Google',
+    description:
+      'Creates a new user from a Firebase Google ID token and returns a JWT.',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many registration attempts. Please try again in an hour.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Account created successfully via Google.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid token or user already exists.',
+  })
   @ApiResponse({ status: 500, description: 'Internal server error.' })
   @ApiBody({ type: GoogleAuthDto })
   async signupWithGoogle(@Body() googleAuthDto: GoogleAuthDto) {
@@ -57,10 +83,19 @@ export class AccountController {
   @StrictThrottle()
   @Post('signin')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Sign in with credentials', description: 'Authenticates via email/password and returns a JWT.' })
-  @ApiResponse({ status: 429, description: 'Too many login attempts. Please try again later.' })
+  @ApiOperation({
+    summary: 'Sign in with credentials',
+    description: 'Authenticates via email/password and returns a JWT.',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many login attempts. Please try again later.',
+  })
   @ApiResponse({ status: 200, description: 'Signed in successfully.' })
-  @ApiResponse({ status: 400, description: 'Invalid credentials or account suspended.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid credentials or account suspended.',
+  })
   @ApiBody({ type: LoginDto })
   async signin(@Body() loginDto: LoginDto) {
     return this.accountService.signin(loginDto);
@@ -70,9 +105,19 @@ export class AccountController {
   @StrictThrottle()
   @Post('signin/google')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Sign in via Google', description: 'Authenticates via a Firebase Google ID token and returns a JWT.' })
-  @ApiResponse({ status: 429, description: 'Too many login attempts. Please try again later.' })
-  @ApiResponse({ status: 200, description: 'Signed in successfully via Google.' })
+  @ApiOperation({
+    summary: 'Sign in via Google',
+    description:
+      'Authenticates via a Firebase Google ID token and returns a JWT.',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many login attempts. Please try again later.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Signed in successfully via Google.',
+  })
   @ApiResponse({ status: 400, description: 'User not found or invalid token.' })
   @ApiResponse({ status: 500, description: 'Internal server error.' })
   @ApiBody({ type: GoogleAuthDto })
@@ -82,9 +127,16 @@ export class AccountController {
 
   @Get('profile-details')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get current user profile', description: 'Returns the authenticated user\'s profile details. Requires a valid JWT.' })
+  @ApiOperation({
+    summary: 'Get current user profile',
+    description:
+      "Returns the authenticated user's profile details. Requires a valid JWT.",
+  })
   @ApiResponse({ status: 200, description: 'Profile retrieved successfully.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized — missing or invalid JWT.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized — missing or invalid JWT.',
+  })
   @ApiResponse({ status: 404, description: 'User not found.' })
   async getProfileDetails(@CurrentUser('email') email: string) {
     return this.accountService.getProfileDetails(email);

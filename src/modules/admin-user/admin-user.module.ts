@@ -4,7 +4,10 @@ import { AdminUserController } from './admin-user.controller';
 import { AdminUserService } from './admin-user.service';
 import { AdminUser, AdminUserSchema } from './schemas/admin-user.schema';
 import { User, UserSchema } from '../account/schemas/user.schema';
-import { Notifications, NotificationSchema } from '../notification/schemas/notification.schema';
+import {
+  Notifications,
+  NotificationSchema,
+} from '../notification/schemas/notification.schema';
 import { Task, TaskSchema } from '../task/schemas/task.schema';
 
 @Module({

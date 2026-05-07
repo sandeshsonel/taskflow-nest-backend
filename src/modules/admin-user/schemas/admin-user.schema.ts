@@ -25,7 +25,11 @@ export class SubUser {
   @Prop({ enum: ['invited', 'active', 'suspended'], default: 'invited' })
   status: string;
 
-  @Prop({ enum: ['admin', 'editor', 'viewer'], required: true, default: 'viewer' })
+  @Prop({
+    enum: ['admin', 'editor', 'viewer'],
+    required: true,
+    default: 'viewer',
+  })
   role: string;
 
   @Prop({ default: null })

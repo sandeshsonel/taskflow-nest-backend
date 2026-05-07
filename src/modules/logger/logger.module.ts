@@ -6,4 +6,4 @@ import { WinstonLoggerService } from './logger.service';
   providers: [WinstonLoggerService],
   exports: [WinstonLoggerService],
 })
-export class LoggerModule { }
+export class LoggerModule {}

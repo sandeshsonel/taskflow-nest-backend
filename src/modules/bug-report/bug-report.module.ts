@@ -6,9 +6,11 @@ import { BugReport, BugReportSchema } from './schemas/bug-report.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: BugReport.name, schema: BugReportSchema }]),
+    MongooseModule.forFeature([
+      { name: BugReport.name, schema: BugReportSchema },
+    ]),
   ],
   controllers: [BugReportController],
-  providers: [BugReportService]
+  providers: [BugReportService],
 })
 export class BugReportModule {}

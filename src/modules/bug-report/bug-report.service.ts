@@ -17,7 +17,7 @@ export class BugReportService {
     private readonly bugReportModel: Model<BugReportDocument>,
     private readonly i18n: I18nService,
     private readonly logger: WinstonLoggerService,
-  ) { }
+  ) {}
 
   async createBugReport(
     createBugReportDto: CreateBugReportDto,
@@ -29,32 +29,32 @@ export class BugReportService {
       const processedFiles = !files?.length
         ? []
         : await Promise.all(
-          files.map(async (file) => {
-            const originalPath = file.path;
-            const filename = file.filename.replace(
-              /\.(png|jpg|jpeg)$/i,
-              '.webp',
-            );
-            const compressedPath = path.join(
-              path.dirname(originalPath),
-              filename,
-            );
+            files.map(async (file) => {
+              const originalPath = file.path;
+              const filename = file.filename.replace(
+                /\.(png|jpg|jpeg)$/i,
+                '.webp',
+              );
+              const compressedPath = path.join(
+                path.dirname(originalPath),
+                filename,
+              );
 
-            // Step 1: read file into memory
-            const inputBuffer = await fs.readFile(originalPath);
+              // Step 1: read file into memory
+              const inputBuffer = await fs.readFile(originalPath);
 
-            // Step 2: delete original
-            await fs.unlink(originalPath);
+              // Step 2: delete original
+              await fs.unlink(originalPath);
 
-            // Step 3: compress and save
-            await sharp(inputBuffer)
-              .resize({ width: 1280, withoutEnlargement: true })
-              .webp({ quality: 80 })
-              .toFile(compressedPath);
+              // Step 3: compress and save
+              await sharp(inputBuffer)
+                .resize({ width: 1280, withoutEnlargement: true })
+                .webp({ quality: 80 })
+                .toFile(compressedPath);
 
-            return `${protocol}://${host}/bug-attachments/${filename}`;
-          }),
-        );
+              return `${protocol}://${host}/bug-attachments/${filename}`;
+            }),
+          );
 
       await this.bugReportModel.create({
         ...createBugReportDto,

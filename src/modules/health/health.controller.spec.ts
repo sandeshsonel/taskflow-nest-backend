@@ -1,5 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HealthCheckService, MongooseHealthIndicator, MemoryHealthIndicator, DiskHealthIndicator } from '@nestjs/terminus';
+import {
+  HealthCheckService,
+  MongooseHealthIndicator,
+  MemoryHealthIndicator,
+  DiskHealthIndicator,
+} from '@nestjs/terminus';
 import { HealthController } from './health.controller';
 
 describe('HealthController', () => {
@@ -35,18 +40,30 @@ describe('HealthController', () => {
         },
         {
           provide: MongooseHealthIndicator,
-          useValue: { pingCheck: jest.fn().mockResolvedValue({ database: { status: 'up' } }) },
+          useValue: {
+            pingCheck: jest
+              .fn()
+              .mockResolvedValue({ database: { status: 'up' } }),
+          },
         },
         {
           provide: MemoryHealthIndicator,
           useValue: {
-            checkHeap: jest.fn().mockResolvedValue({ memory_heap: { status: 'up' } }),
-            checkRSS: jest.fn().mockResolvedValue({ memory_rss: { status: 'up' } }),
+            checkHeap: jest
+              .fn()
+              .mockResolvedValue({ memory_heap: { status: 'up' } }),
+            checkRSS: jest
+              .fn()
+              .mockResolvedValue({ memory_rss: { status: 'up' } }),
           },
         },
         {
           provide: DiskHealthIndicator,
-          useValue: { checkStorage: jest.fn().mockResolvedValue({ storage: { status: 'up' } }) },
+          useValue: {
+            checkStorage: jest
+              .fn()
+              .mockResolvedValue({ storage: { status: 'up' } }),
+          },
         },
       ],
     }).compile();

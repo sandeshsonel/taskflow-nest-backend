@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Notifications, NotificationSchema } from './schemas/notification.schema';
+import {
+  Notifications,
+  NotificationSchema,
+} from './schemas/notification.schema';
 
 @Module({
   imports: [

@@ -9,11 +9,10 @@ import { JwtPayload } from '@modules/auth/interfaces/jwt-payload.interface';
  *   @GetUser('email') email: string
  */
 export const GetUser = createParamDecorator(
-    (data: keyof JwtPayload | undefined, ctx: ExecutionContext) => {
-        const request = ctx.switchToHttp().getRequest();
-        const user = request.user as JwtPayload;
+  (data: keyof JwtPayload | undefined, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    const user = request.user as JwtPayload;
 
-        return data ? user?.[data] : user;
-    },
+    return data ? user?.[data] : user;
+  },
 );
-

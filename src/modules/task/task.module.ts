@@ -16,4 +16,4 @@ import { User, UserSchema } from '@modules/account/schemas/user.schema';
   providers: [TaskService],
   exports: [TaskService],
 })
-export class TaskModule { }
+export class TaskModule {}

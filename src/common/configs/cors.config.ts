@@ -3,18 +3,20 @@ import { ConfigService } from '@nestjs/config';
 
 /**
  * ARCHITECT'S NOTE: Secure & Performant CORS Policy
- * 
+ *
  * Implements a dual-layer origin validation strategy:
  * - O(1) Set lookups for static origins.
  * - Pre-compiled Regex for dynamic wildcards.
- * 
+ *
  * Safety: Wildcard '*' is strictly forbidden in production.
  */
 export function setupCors(app: INestApplication): void {
   const configService = app.get(ConfigService);
   const logger = new Logger('CORS');
 
-  const rawAllowedOrigins = configService.get<string[]>('app.allowedOrigins') || ['*'];
+  const rawAllowedOrigins = configService.get<string[]>(
+    'app.allowedOrigins',
+  ) || ['*'];
   const isProduction = configService.get<boolean>('app.isProduction');
 
   // Pre-process origins during bootstrap to keep request cycles lean.
