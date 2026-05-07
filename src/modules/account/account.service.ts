@@ -18,6 +18,7 @@ import { LoginDto } from './dto/login.dto';
 import { GoogleAuthDto } from './dto/google-auth.dto';
 import { AccountKeys, CommonKeys } from '../../common/constants/validation-messages';
 import admin from '../../utils/firebase';
+import { WinstonLoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class AccountService {
@@ -26,6 +27,7 @@ export class AccountService {
     @InjectModel(AdminUser.name) private adminUserModel: Model<AdminUserDocument>,
     private jwtService: JwtService,
     private readonly i18n: I18nService,
+    private readonly logger: WinstonLoggerService,
   ) { }
 
   async signup(createAccountDto: CreateAccountDto) {
@@ -162,7 +164,7 @@ export class AccountService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      console.error('Error creating user:', error);
+      this.logger.error('Error creating user:', error);
       throw new InternalServerErrorException(
         this.i18n.t(CommonKeys.SERVER_ERROR),
       );
@@ -252,7 +254,7 @@ export class AccountService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      console.error('Signin error:', error);
+      this.logger.error('Signin error:', error);
       throw new InternalServerErrorException(
         this.i18n.t(CommonKeys.SERVER_ERROR),
       );

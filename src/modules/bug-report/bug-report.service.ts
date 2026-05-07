@@ -8,6 +8,7 @@ import { BugReport, BugReportDocument } from './schemas/bug-report.schema';
 import { CreateBugReportDto } from './dto/create-bug-report.dto';
 import { I18nService } from 'nestjs-i18n';
 import { BugReportKeys } from '@common/constants/validation-messages';
+import { WinstonLoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class BugReportService {
@@ -15,7 +16,8 @@ export class BugReportService {
     @InjectModel(BugReport.name)
     private readonly bugReportModel: Model<BugReportDocument>,
     private readonly i18n: I18nService,
-  ) {}
+    private readonly logger: WinstonLoggerService,
+  ) { }
 
   async createBugReport(
     createBugReportDto: CreateBugReportDto,
@@ -23,9 +25,10 @@ export class BugReportService {
     protocol: string,
     host: string,
   ) {
-    const processedFiles = !files?.length
-      ? []
-      : await Promise.all(
+    try {
+      const processedFiles = !files?.length
+        ? []
+        : await Promise.all(
           files.map(async (file) => {
             const originalPath = file.path;
             const filename = file.filename.replace(
@@ -53,14 +56,18 @@ export class BugReportService {
           }),
         );
 
-    await this.bugReportModel.create({
-      ...createBugReportDto,
-      attachments: processedFiles,
-    });
+      await this.bugReportModel.create({
+        ...createBugReportDto,
+        attachments: processedFiles,
+      });
 
-    return {
-      success: true,
-      message: this.i18n.t(BugReportKeys.SUCCESS_CREATE),
-    };
+      return {
+        success: true,
+        message: this.i18n.t(BugReportKeys.SUCCESS_CREATE),
+      };
+    } catch (error) {
+      this.logger.error('Error creating bug report:', error);
+      throw error;
+    }
   }
 }

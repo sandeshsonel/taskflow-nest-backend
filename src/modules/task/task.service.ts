@@ -14,6 +14,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { JwtPayload } from '@modules/auth/interfaces/jwt-payload.interface';
 import { TaskKeys } from '@common/constants/validation-messages';
+import { WinstonLoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class TaskService {
@@ -21,6 +22,7 @@ export class TaskService {
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private readonly i18n: I18nService,
+    private readonly logger: WinstonLoggerService,
   ) { }
 
   async getTaskById(taskId: string, userId: string) {
@@ -151,23 +153,28 @@ export class TaskService {
       }
     }
 
-    const taskData = {
-      ...createTaskDto,
-      assignTo: createTaskDto.assignTo
-        ? new Types.ObjectId(createTaskDto.assignTo)
-        : new Types.ObjectId(user.id),
-    };
+    try {
+      const taskData = {
+        ...createTaskDto,
+        assignTo: createTaskDto.assignTo
+          ? new Types.ObjectId(createTaskDto.assignTo)
+          : new Types.ObjectId(user.id),
+      };
 
-    await this.taskModel.findOneAndUpdate(
-      { userId: new Types.ObjectId(createUserId) },
-      { $push: { tasks: taskData } },
-      { new: true, upsert: true },
-    );
+      await this.taskModel.findOneAndUpdate(
+        { userId: new Types.ObjectId(createUserId) },
+        { $push: { tasks: taskData } },
+        { new: true, upsert: true },
+      );
 
-    return {
-      success: true,
-      message: this.i18n.t(TaskKeys.CREATE_SUCCESS),
-    };
+      return {
+        success: true,
+        message: this.i18n.t(TaskKeys.CREATE_SUCCESS),
+      };
+    } catch (error) {
+      this.logger.error('Error creating task in TaskService:', error);
+      throw error;
+    }
   }
 
   async updateTask(
@@ -194,30 +201,35 @@ export class TaskService {
       );
     }
 
-    const updateFields: Record<string, any> = {};
-    for (const [key, value] of Object.entries(updateTaskDto)) {
-      if (value !== undefined) {
-        if (key === 'assignTo' && value) {
-          updateFields[`tasks.$.${key}`] = new Types.ObjectId(value as string);
-        } else {
-          updateFields[`tasks.$.${key}`] = value;
+    try {
+      const updateFields: Record<string, any> = {};
+      for (const [key, value] of Object.entries(updateTaskDto)) {
+        if (value !== undefined) {
+          if (key === 'assignTo' && value) {
+            updateFields[`tasks.$.${key}`] = new Types.ObjectId(value as string);
+          } else {
+            updateFields[`tasks.$.${key}`] = value;
+          }
         }
       }
+
+      await this.taskModel.findOneAndUpdate(
+        {
+          userId: new Types.ObjectId(updateTaskUserId),
+          'tasks._id': new Types.ObjectId(taskId),
+        },
+        { $set: updateFields },
+        { new: true },
+      );
+
+      return {
+        success: true,
+        message: this.i18n.t(TaskKeys.UPDATE_SUCCESS),
+      };
+    } catch (error) {
+      this.logger.error('Error updating task in TaskService:', error);
+      throw error;
     }
-
-    await this.taskModel.findOneAndUpdate(
-      {
-        userId: new Types.ObjectId(updateTaskUserId),
-        'tasks._id': new Types.ObjectId(taskId),
-      },
-      { $set: updateFields },
-      { new: true },
-    );
-
-    return {
-      success: true,
-      message: this.i18n.t(TaskKeys.UPDATE_SUCCESS),
-    };
   }
 
   async deleteTask(user: JwtPayload, taskId: string) {

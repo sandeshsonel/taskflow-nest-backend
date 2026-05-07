@@ -21,7 +21,8 @@ import {
   HealthModule,
   JwtAuthGuard,
   AdminUserModule,
-  NotificationModule
+  NotificationModule,
+  LoggerModule
 } from '@modules';
 
 const FEATURE_MODULES = [
@@ -31,7 +32,8 @@ const FEATURE_MODULES = [
   TaskModule,
   HealthModule,
   AdminUserModule,
-  NotificationModule
+  NotificationModule,
+  LoggerModule
 ];
 
 import { configs, validate } from './config';

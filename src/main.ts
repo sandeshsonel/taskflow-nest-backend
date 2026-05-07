@@ -5,9 +5,13 @@ import {
   I18nValidationPipe,
 } from 'nestjs-i18n';
 import { AppModule } from './app.module';
+import { WinstonLoggerService } from '@modules';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const logger = app.get(WinstonLoggerService);
+  app.useLogger(logger);
 
   // I18n-aware validation: translates class-validator messages
   // based on the request's resolved locale.

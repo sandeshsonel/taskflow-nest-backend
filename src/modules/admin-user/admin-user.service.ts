@@ -11,6 +11,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { getLastNDays, percentChange } from '../../utils';
 import { I18nService } from 'nestjs-i18n';
 import { AdminKeys, AccountKeys } from '../../common/constants/validation-messages';
+import { WinstonLoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class AdminUserService {
@@ -20,7 +21,8 @@ export class AdminUserService {
     @InjectModel(Notifications.name) private notificationModel: Model<NotificationDocument>,
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     private readonly i18n: I18nService,
-  ) {}
+    private readonly logger: WinstonLoggerService,
+  ) { }
 
   async getUsersList(adminId: string) {
     const adminUser = await this.adminUserModel.findOne({ adminId }).select([
@@ -53,47 +55,52 @@ export class AdminUserService {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const normalUser = await this.userModel.findOne({ email });
+    try {
+      const normalUser = await this.userModel.findOne({ email });
 
-    const adminUser = await this.adminUserModel.findOneAndUpdate(
-      { adminId },
-      {
-        $push: {
-          users: {
-            firstName,
-            lastName,
-            email,
-            role,
-            userId: normalUser?._id ?? null,
-            password: hashedPassword,
-            active: true,
-            status: 'invited',
-            joinedAt: null,
-            lastLogin: null,
+      const adminUser = await this.adminUserModel.findOneAndUpdate(
+        { adminId },
+        {
+          $push: {
+            users: {
+              firstName,
+              lastName,
+              email,
+              role,
+              userId: normalUser?._id ?? null,
+              password: hashedPassword,
+              active: true,
+              status: 'invited',
+              joinedAt: null,
+              lastLogin: null,
+            },
           },
         },
-      },
-      { new: true, upsert: true },
-    );
+        { new: true, upsert: true },
+      );
 
-    const lastAddedUser = adminUser?.users[adminUser.users.length - 1];
+      const lastAddedUser = adminUser?.users[adminUser.users.length - 1];
 
-    const notificationData = {
-      message: this.i18n.t(AdminKeys.USER_INVITE_NOTIFICATION, { args: { adminName: adminFullName } }),
-      actionType: 'invite',
-      actionData: {
-        adminId: String(adminId),
-        userId: String(lastAddedUser?._id),
-      },
-    };
+      const notificationData = {
+        message: this.i18n.t(AdminKeys.USER_INVITE_NOTIFICATION, { args: { adminName: adminFullName } }),
+        actionType: 'invite',
+        actionData: {
+          adminId: String(adminId),
+          userId: String(lastAddedUser?._id),
+        },
+      };
 
-    await this.notificationModel.findOneAndUpdate(
-      { email },
-      { $push: { notifications: notificationData } },
-      { new: true, upsert: true },
-    );
+      await this.notificationModel.findOneAndUpdate(
+        { email },
+        { $push: { notifications: notificationData } },
+        { new: true, upsert: true },
+      );
 
-    return { message: this.i18n.t(AdminKeys.USER_CREATED) };
+      return { message: this.i18n.t(AdminKeys.USER_CREATED) };
+    } catch (error) {
+      this.logger.error('Error creating user in AdminUserService:', error);
+      throw error;
+    }
   }
 
   async updateUser(adminId: string, userId: string, updateUserDto: UpdateUserDto) {
@@ -113,18 +120,23 @@ export class AdminUserService {
       updateData.password = hashedPassword;
     }
 
-    const updateFields: Record<string, any> = {};
-    for (const [key, value] of Object.entries(updateData)) {
-      updateFields[`users.$.${key}`] = value;
+    try {
+      const updateFields: Record<string, any> = {};
+      for (const [key, value] of Object.entries(updateData)) {
+        updateFields[`users.$.${key}`] = value;
+      }
+
+      await this.adminUserModel.findOneAndUpdate(
+        { adminId, 'users._id': userId },
+        { $set: updateFields },
+        { new: true },
+      );
+
+      return { message: this.i18n.t(AdminKeys.USER_UPDATED) };
+    } catch (error) {
+      this.logger.error('Error updating user in AdminUserService:', error);
+      throw error;
     }
-
-    await this.adminUserModel.findOneAndUpdate(
-      { adminId, 'users._id': userId },
-      { $set: updateFields },
-      { new: true },
-    );
-
-    return { message: this.i18n.t(AdminKeys.USER_UPDATED) };
   }
 
   async deleteUser(adminId: string, userId: string) {
@@ -141,90 +153,95 @@ export class AdminUserService {
   }
 
   async getDashboardStats(adminId: string) {
-    const last7Days = getLastNDays(7);
-    const prev14Days = getLastNDays(14);
+    try {
+      const last7Days = getLastNDays(7);
+      const prev14Days = getLastNDays(14);
 
-    const admin = await this.adminUserModel.findOne({ adminId });
-    if (!admin) {
-      return {};
+      const admin = await this.adminUserModel.findOne({ adminId });
+      if (!admin) {
+        return {};
+      }
+
+      const users = admin.users;
+      const normalUserIds = users.map((u: any) => u.userId).filter(id => id != null);
+
+      const totalUsers = users.length;
+      const currentNewSignups = users.filter(
+        (u: any) => u.joinedAt && u.joinedAt >= last7Days,
+      ).length;
+      const previousNewSignups = users.filter(
+        (u: any) => u.joinedAt && u.joinedAt >= prev14Days && u.joinedAt < last7Days,
+      ).length;
+      const usersLastWeek = users.filter((u: any) => u.joinedAt && u.joinedAt < last7Days).length;
+
+      // ACTIVE TASKS NOW
+      const activeTasksNow = await this.taskModel.aggregate([
+        { $unwind: '$tasks' },
+        {
+          $match: {
+            'tasks.assignTo': { $in: normalUserIds },
+            'tasks.status': { $in: ['pending', 'in-progress'] },
+          },
+        },
+        { $count: 'total' },
+      ]);
+      const activeTasksCount = activeTasksNow[0]?.total || 0;
+
+      // ACTIVE TASKS LAST WEEK
+      const activeTasksPrev = await this.taskModel.aggregate([
+        { $unwind: '$tasks' },
+        {
+          $match: {
+            'tasks.assignTo': { $in: normalUserIds },
+            'tasks.status': { $in: ['pending', 'in-progress'] },
+            'tasks.updatedAt': { $lt: last7Days },
+          },
+        },
+        { $count: 'total' },
+      ]);
+      const activeTasksPrevCount = activeTasksPrev[0]?.total || 0;
+
+      // COMPLETED THIS WEEK
+      const completedThisWeekAgg = await this.taskModel.aggregate([
+        { $unwind: '$tasks' },
+        {
+          $match: {
+            'tasks.assignTo': { $in: normalUserIds },
+            'tasks.status': 'completed',
+            'tasks.updatedAt': { $gte: last7Days },
+          },
+        },
+        { $count: 'total' },
+      ]);
+      const completedThisWeekCount = completedThisWeekAgg[0]?.total || 0;
+
+      // COMPLETED LAST WEEK
+      const completedLastWeekAgg = await this.taskModel.aggregate([
+        { $unwind: '$tasks' },
+        {
+          $match: {
+            'tasks.assignTo': { $in: normalUserIds },
+            'tasks.status': 'completed',
+            'tasks.updatedAt': { $gte: prev14Days, $lt: last7Days },
+          },
+        },
+        { $count: 'total' },
+      ]);
+      const completedLastWeekCount = completedLastWeekAgg[0]?.total || 0;
+
+      return {
+        totalUsers,
+        totalUsersChange: percentChange(totalUsers, usersLastWeek),
+        activeTasks: activeTasksCount,
+        activeTasksChange: percentChange(activeTasksCount, activeTasksPrevCount),
+        completedThisWeek: completedThisWeekCount,
+        completedThisWeekChange: percentChange(completedThisWeekCount, completedLastWeekCount),
+        newSignups: currentNewSignups,
+        newSignupsChange: percentChange(currentNewSignups, previousNewSignups),
+      };
+    } catch (error) {
+      this.logger.error('Error fetching dashboard stats in AdminUserService:', error);
+      throw error;
     }
-
-    const users = admin.users;
-    const normalUserIds = users.map((u: any) => u.userId).filter(id => id != null);
-
-    const totalUsers = users.length;
-    const currentNewSignups = users.filter(
-      (u: any) => u.joinedAt && u.joinedAt >= last7Days,
-    ).length;
-    const previousNewSignups = users.filter(
-      (u: any) => u.joinedAt && u.joinedAt >= prev14Days && u.joinedAt < last7Days,
-    ).length;
-    const usersLastWeek = users.filter((u: any) => u.joinedAt && u.joinedAt < last7Days).length;
-
-    // ACTIVE TASKS NOW
-    const activeTasksNow = await this.taskModel.aggregate([
-      { $unwind: '$tasks' },
-      {
-        $match: {
-          'tasks.assignTo': { $in: normalUserIds },
-          'tasks.status': { $in: ['pending', 'in-progress'] },
-        },
-      },
-      { $count: 'total' },
-    ]);
-    const activeTasksCount = activeTasksNow[0]?.total || 0;
-
-    // ACTIVE TASKS LAST WEEK
-    const activeTasksPrev = await this.taskModel.aggregate([
-      { $unwind: '$tasks' },
-      {
-        $match: {
-          'tasks.assignTo': { $in: normalUserIds },
-          'tasks.status': { $in: ['pending', 'in-progress'] },
-          'tasks.updatedAt': { $lt: last7Days },
-        },
-      },
-      { $count: 'total' },
-    ]);
-    const activeTasksPrevCount = activeTasksPrev[0]?.total || 0;
-
-    // COMPLETED THIS WEEK
-    const completedThisWeekAgg = await this.taskModel.aggregate([
-      { $unwind: '$tasks' },
-      {
-        $match: {
-          'tasks.assignTo': { $in: normalUserIds },
-          'tasks.status': 'completed',
-          'tasks.updatedAt': { $gte: last7Days },
-        },
-      },
-      { $count: 'total' },
-    ]);
-    const completedThisWeekCount = completedThisWeekAgg[0]?.total || 0;
-
-    // COMPLETED LAST WEEK
-    const completedLastWeekAgg = await this.taskModel.aggregate([
-      { $unwind: '$tasks' },
-      {
-        $match: {
-          'tasks.assignTo': { $in: normalUserIds },
-          'tasks.status': 'completed',
-          'tasks.updatedAt': { $gte: prev14Days, $lt: last7Days },
-        },
-      },
-      { $count: 'total' },
-    ]);
-    const completedLastWeekCount = completedLastWeekAgg[0]?.total || 0;
-
-    return {
-      totalUsers,
-      totalUsersChange: percentChange(totalUsers, usersLastWeek),
-      activeTasks: activeTasksCount,
-      activeTasksChange: percentChange(activeTasksCount, activeTasksPrevCount),
-      completedThisWeek: completedThisWeekCount,
-      completedThisWeekChange: percentChange(completedThisWeekCount, completedLastWeekCount),
-      newSignups: currentNewSignups,
-      newSignupsChange: percentChange(currentNewSignups, previousNewSignups),
-    };
   }
 }
