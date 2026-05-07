@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import {
   I18nValidationExceptionFilter,
   I18nValidationPipe,
@@ -24,6 +25,42 @@ async function bootstrap() {
       detailedErrors: true,
     }),
   );
+
+  // ──────────────────────────────────────────────────────
+  //  Swagger / OpenAPI Documentation
+  // ──────────────────────────────────────────────────────
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('X-Name API')
+    .setDescription(
+      'REST API documentation for the X-Name backend — covering authentication, account management, and more.',
+    )
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Enter your JWT token',
+      },
+      'JWT-auth', // security name referenced by @ApiBearerAuth('JWT-auth')
+    )
+    .addTag('App', 'Root endpoint & API metadata')
+    .addTag('Health', 'Liveness, readiness & dependency health checks')
+    .addTag('Account', 'User registration, login & profile management')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+
+  SwaggerModule.setup('api/docs', app, document, {
+    customSiteTitle: 'X-Name API Docs',
+    swaggerOptions: {
+      persistAuthorization: true,
+      docExpansion: 'list',
+      filter: true,
+      tagsSorter: 'alpha',
+      operationsSorter: 'method',
+    },
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }

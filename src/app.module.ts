@@ -15,6 +15,7 @@ import { AppService } from './app.service';
 import { AccountModule } from './account/account.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth';
+import { HealthModule } from './health';
 
 import { configs, validate } from './config';
 
@@ -56,6 +57,7 @@ const environment = process.env.NODE_ENV || 'development';
     }),
     AuthModule,
     AccountModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [
