@@ -47,6 +47,7 @@ async function bootstrap() {
     .addTag('App', 'Root endpoint & API metadata')
     .addTag('Health', 'Liveness, readiness & dependency health checks')
     .addTag('Account', 'User registration, login & profile management')
+    .addTag('Bug Report', 'Public endpoint for reporting bugs and issues')
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

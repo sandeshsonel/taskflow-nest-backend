@@ -8,6 +8,7 @@ import {
   HeaderResolver,
   QueryResolver,
 } from 'nestjs-i18n';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'path';
 
 import { AppController } from './app.controller';
@@ -18,6 +19,7 @@ import { JwtAuthGuard } from '@modules/auth';
 import { HealthModule } from '@modules/health';
 
 import { configs, validate } from './config';
+import { BugReportModule } from '@modules/bug-report/bug-report.module';
 
 const environment = process.env.NODE_ENV || 'development';
 
@@ -57,7 +59,12 @@ const environment = process.env.NODE_ENV || 'development';
     }),
     AuthModule,
     AccountModule,
+    BugReportModule,
     HealthModule,
+    ServeStaticModule.forRoot({
+      rootPath: path.join(__dirname, '..', 'uploads', 'bug-attachments'),
+      serveRoot: '/bug-attachments',
+    }),
   ],
   controllers: [AppController],
   providers: [

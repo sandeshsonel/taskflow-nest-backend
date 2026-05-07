@@ -1,0 +1,17 @@
+{
+  "SUCCESS": {
+    "CREATE": "Bug report submitted successfully!"
+  },
+  "ERROR": {
+    "FILE_TYPE": "Only image files are allowed!",
+    "ERR_INVALID_FILE_TYPE": "Only image files (JPG, PNG, WEBP) are allowed!",
+    "FILE_SIZE": "File too large (max 1MB)",
+    "FILE_LIMIT": "You can upload a maximum of 5 files."
+  },
+  "FIELDS": {
+    "FULL_NAME": "Full name",
+    "EMAIL": "Email",
+    "TITLE": "Bug title",
+    "DESCRIPTION": "Bug description"
+  }
+}
