@@ -19,7 +19,7 @@ export class EnvironmentVariables {
   TZ: string;
 
   @IsString()
-  CORS_URL: string;
+  ALLOWED_ORIGINS: string;
 
   @IsString()
   LOG_DIR: string;
