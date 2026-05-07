@@ -13,12 +13,22 @@ import * as path from 'path';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AccountModule } from '@modules/account/account.module';
-import { AuthModule } from '@modules/auth/auth.module';
-import { JwtAuthGuard } from '@modules/auth';
-import { HealthModule } from '@modules/health';
-import { TaskModule } from '@modules/task/task.module';
-import { BugReportModule } from '@modules/bug-report/bug-report.module';
+import {
+  AuthModule,
+  AccountModule,
+  BugReportModule,
+  TaskModule,
+  HealthModule,
+  JwtAuthGuard,
+} from '@modules';
+
+const FEATURE_MODULES = [
+  AuthModule,
+  AccountModule,
+  BugReportModule,
+  TaskModule,
+  HealthModule,
+];
 
 import { configs, validate } from './config';
 
@@ -58,11 +68,7 @@ const environment = process.env.NODE_ENV || 'development';
       },
       inject: [ConfigService],
     }),
-    AuthModule,
-    AccountModule,
-    BugReportModule,
-    TaskModule,
-    HealthModule,
+    ...FEATURE_MODULES,
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, '..', 'uploads', 'bug-attachments'),
       serveRoot: '/bug-attachments',

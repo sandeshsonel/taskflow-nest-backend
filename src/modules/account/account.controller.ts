@@ -11,6 +11,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiBody,
 } from '@nestjs/swagger';
 import { AccountService } from './account.service';
 import { CreateAccountDto } from './dto/create-account.dto';
@@ -30,6 +31,7 @@ export class AccountController {
   @ApiResponse({ status: 201, description: 'Account created successfully.' })
   @ApiResponse({ status: 400, description: 'Validation error or email already registered.' })
   @ApiResponse({ status: 500, description: 'Internal server error.' })
+  @ApiBody({ type: CreateAccountDto })
   async signup(@Body() createAccountDto: CreateAccountDto) {
     return this.accountService.signup(createAccountDto);
   }
@@ -41,6 +43,7 @@ export class AccountController {
   @ApiResponse({ status: 201, description: 'Account created successfully via Google.' })
   @ApiResponse({ status: 400, description: 'Invalid token or user already exists.' })
   @ApiResponse({ status: 500, description: 'Internal server error.' })
+  @ApiBody({ type: GoogleAuthDto })
   async signupWithGoogle(@Body() googleAuthDto: GoogleAuthDto) {
     return this.accountService.signupWithGoogle(googleAuthDto);
   }
@@ -51,6 +54,7 @@ export class AccountController {
   @ApiOperation({ summary: 'Sign in with credentials', description: 'Authenticates via email/password and returns a JWT.' })
   @ApiResponse({ status: 200, description: 'Signed in successfully.' })
   @ApiResponse({ status: 400, description: 'Invalid credentials or account suspended.' })
+  @ApiBody({ type: LoginDto })
   async signin(@Body() loginDto: LoginDto) {
     return this.accountService.signin(loginDto);
   }
@@ -62,6 +66,7 @@ export class AccountController {
   @ApiResponse({ status: 200, description: 'Signed in successfully via Google.' })
   @ApiResponse({ status: 400, description: 'User not found or invalid token.' })
   @ApiResponse({ status: 500, description: 'Internal server error.' })
+  @ApiBody({ type: GoogleAuthDto })
   async signinWithGoogle(@Body() googleAuthDto: GoogleAuthDto) {
     return this.accountService.signinWithGoogle(googleAuthDto);
   }

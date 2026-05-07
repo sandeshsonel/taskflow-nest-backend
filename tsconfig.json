@@ -23,17 +23,32 @@
     "baseUrl": "./",
     "ignoreDeprecations": "6.0",
     "paths": {
+      "@modules": [
+        "src/modules/index"
+      ],
       "@modules/*": [
         "src/modules/*"
+      ],
+      "@common": [
+        "src/common/index"
       ],
       "@common/*": [
         "src/common/*"
       ],
+      "@config": [
+        "src/config/index"
+      ],
       "@config/*": [
         "src/config/*"
       ],
+      "@utils": [
+        "src/utils/index"
+      ],
       "@utils/*": [
         "src/utils/*"
+      ],
+      "@i18n": [
+        "src/i18n/index"
       ],
       "@i18n/*": [
         "src/i18n/*"

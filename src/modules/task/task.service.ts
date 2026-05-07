@@ -21,7 +21,7 @@ export class TaskService {
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   async getTaskById(taskId: string, userId: string) {
     const userTask = await this.taskModel.findOne(

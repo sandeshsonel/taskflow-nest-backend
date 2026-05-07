@@ -49,6 +49,7 @@ async function bootstrap() {
     .addTag('Health', 'Liveness, readiness & dependency health checks')
     .addTag('Account', 'User registration, login & profile management')
     .addTag('Bug Report', 'Public endpoint for reporting bugs and issues')
+    .addTag('Task', 'Task management and assignments')
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
@@ -64,6 +65,6 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 8000);
 }
 bootstrap();
