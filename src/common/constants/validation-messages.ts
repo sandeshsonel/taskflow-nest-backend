@@ -78,8 +78,32 @@ export const CommonKeys = {
   BAD_REQUEST: 'common.BAD_REQUEST',
 } as const;
 
+// ─── Task module ────────────────────────────────────────────────────────────
+export const TaskKeys = {
+  CREATE_SUCCESS: 'task.CREATE_SUCCESS',
+  CREATE_FAILED: 'task.CREATE_FAILED',
+  UPDATE_SUCCESS: 'task.UPDATE_SUCCESS',
+  UPDATE_FAILED: 'task.UPDATE_FAILED',
+  DELETE_SUCCESS: 'task.DELETE_SUCCESS',
+  DELETE_FAILED: 'task.DELETE_FAILED',
+  NOT_FOUND: 'task.NOT_FOUND',
+  FORBIDDEN_DELETE: 'task.FORBIDDEN_DELETE',
+  ADMIN_NOT_FOUND: 'task.ADMIN_NOT_FOUND',
+} as const;
+
+// ─── Bug Report module ──────────────────────────────────────────────────────
+export const BugReportKeys = {
+  SUCCESS_CREATE: 'bug-report.SUCCESS.CREATE',
+  ERROR_FILE_TYPE: 'bug-report.ERROR.FILE_TYPE',
+  ERROR_INVALID_FILE_TYPE: 'bug-report.ERROR.ERR_INVALID_FILE_TYPE',
+  ERROR_FILE_SIZE: 'bug-report.ERROR.FILE_SIZE',
+  ERROR_FILE_LIMIT: 'bug-report.ERROR.FILE_LIMIT',
+} as const;
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 export type ValidationKey = (typeof ValidationKeys)[keyof typeof ValidationKeys];
 export type AccountKey = (typeof AccountKeys)[keyof typeof AccountKeys];
 export type AdminKey = (typeof AdminKeys)[keyof typeof AdminKeys];
+export type TaskKey = (typeof TaskKeys)[keyof typeof TaskKeys];
+export type BugReportKey = (typeof BugReportKeys)[keyof typeof BugReportKeys];
 export type CommonKey = (typeof CommonKeys)[keyof typeof CommonKeys];

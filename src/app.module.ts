@@ -17,9 +17,10 @@ import { AccountModule } from '@modules/account/account.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { JwtAuthGuard } from '@modules/auth';
 import { HealthModule } from '@modules/health';
+import { TaskModule } from '@modules/task/task.module';
+import { BugReportModule } from '@modules/bug-report/bug-report.module';
 
 import { configs, validate } from './config';
-import { BugReportModule } from '@modules/bug-report/bug-report.module';
 
 const environment = process.env.NODE_ENV || 'development';
 
@@ -60,6 +61,7 @@ const environment = process.env.NODE_ENV || 'development';
     AuthModule,
     AccountModule,
     BugReportModule,
+    TaskModule,
     HealthModule,
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, '..', 'uploads', 'bug-attachments'),
