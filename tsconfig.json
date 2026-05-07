@@ -16,7 +16,29 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-    "types": ["node", "jest"]
+    "types": [
+      "node",
+      "jest"
+    ],
+    "baseUrl": "./",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@modules/*": [
+        "src/modules/*"
+      ],
+      "@common/*": [
+        "src/common/*"
+      ],
+      "@config/*": [
+        "src/config/*"
+      ],
+      "@utils/*": [
+        "src/utils/*"
+      ],
+      "@i18n/*": [
+        "src/i18n/*"
+      ]
+    }
   },
   "exclude": [
     "node_modules",

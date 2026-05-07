@@ -16,8 +16,8 @@ import { AdminUser, AdminUserDocument } from './schemas/admin-user.schema';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { LoginDto } from './dto/login.dto';
 import { GoogleAuthDto } from './dto/google-auth.dto';
-import { AccountKeys, CommonKeys } from '../common/constants/validation-messages';
-import admin from '../utils/firebase';
+import { AccountKeys, CommonKeys } from '../../common/constants/validation-messages';
+import admin from '../../utils/firebase';
 
 @Injectable()
 export class AccountService {

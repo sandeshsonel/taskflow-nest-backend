@@ -12,10 +12,10 @@ import * as path from 'path';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AccountModule } from './account/account.module';
-import { AuthModule } from './auth/auth.module';
-import { JwtAuthGuard } from './auth';
-import { HealthModule } from './health';
+import { AccountModule } from '@modules/account/account.module';
+import { AuthModule } from '@modules/auth/auth.module';
+import { JwtAuthGuard } from '@modules/auth';
+import { HealthModule } from '@modules/health';
 
 import { configs, validate } from './config';
 

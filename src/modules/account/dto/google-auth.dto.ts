@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
-import { ValidationKeys } from '../../common/constants/validation-messages';
+import { ValidationKeys } from '../../../common/constants/validation-messages';
 
 export class GoogleAuthDto {
   /** Firebase ID token obtained from the Google sign-in client SDK. */

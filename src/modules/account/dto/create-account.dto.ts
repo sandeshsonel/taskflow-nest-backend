@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsIn, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
-import { Match } from '../../common/decorators/match.decorator';
-import { ValidationKeys } from '../../common/constants/validation-messages';
+import { Match } from '../../../common/decorators/match.decorator';
+import { ValidationKeys } from '../../../common/constants/validation-messages';
 
 export class CreateAccountDto {
   /** Full name of the user (3–50 characters). */
