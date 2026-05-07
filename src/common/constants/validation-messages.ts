@@ -60,12 +60,19 @@ export const AccountKeys = {
 export const AdminKeys = {
   DASHBOARD_FETCHED: 'admin.DASHBOARD_FETCHED',
   USER_LIST_FETCHED: 'admin.USER_LIST_FETCHED',
+  USER_CREATED: 'admin.USER_CREATED',
   USER_UPDATED: 'admin.USER_UPDATED',
   USER_DELETED: 'admin.USER_DELETED',
 
   ADMIN_NOT_FOUND: 'admin.ADMIN_NOT_FOUND',
+  USER_NOT_FOUND: 'admin.USER_NOT_FOUND',
   PERMISSION_DENIED: 'admin.PERMISSION_DENIED',
   INVALID_ADMIN_ROLE: 'admin.INVALID_ADMIN_ROLE',
+
+  SAME_EMAIL_ERROR: 'admin.SAME_EMAIL_ERROR',
+  ADMIN_ALREADY_REGISTERED: 'admin.ADMIN_ALREADY_REGISTERED',
+  USER_ID_REQUIRED: 'admin.USER_ID_REQUIRED',
+  USER_INVITE_NOTIFICATION: 'admin.USER_INVITE_NOTIFICATION',
 } as const;
 
 // ─── Common (shared) ────────────────────────────────────────────────────────

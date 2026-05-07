@@ -1,9 +1,15 @@
 {
   "DASHBOARD_FETCHED": "Dashboard data fetched successfully",
   "USER_LIST_FETCHED": "User list fetched successfully",
+  "USER_CREATED": "User created successfully",
   "USER_UPDATED": "User updated successfully",
   "USER_DELETED": "User deleted successfully",
   "ADMIN_NOT_FOUND": "Admin not found",
+  "USER_NOT_FOUND": "User not found",
   "PERMISSION_DENIED": "You do not have permission to perform this action",
-  "INVALID_ADMIN_ROLE": "Invalid admin role"
+  "INVALID_ADMIN_ROLE": "Invalid admin role",
+  "SAME_EMAIL_ERROR": "Cannot create user with same email as admin",
+  "ADMIN_ALREADY_REGISTERED": "User already registered as admin",
+  "USER_ID_REQUIRED": "User ID is required",
+  "USER_INVITE_NOTIFICATION": "You’ve been invited to join {adminName}"
 }

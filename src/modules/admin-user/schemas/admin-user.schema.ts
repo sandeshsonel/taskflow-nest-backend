@@ -5,6 +5,8 @@ export type AdminUserDocument = AdminUser & Document;
 
 @Schema({ timestamps: true })
 export class SubUser {
+  _id: any;
+
   @Prop({ required: true })
   firstName: string;
 

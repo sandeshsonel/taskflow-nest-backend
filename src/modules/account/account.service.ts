@@ -12,7 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { I18nService } from 'nestjs-i18n';
 
 import { User, UserDocument } from './schemas/user.schema';
-import { AdminUser, AdminUserDocument } from './schemas/admin-user.schema';
+import { AdminUser, AdminUserDocument } from '../admin-user/schemas/admin-user.schema';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { LoginDto } from './dto/login.dto';
 import { GoogleAuthDto } from './dto/google-auth.dto';

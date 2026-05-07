@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema, Types } from 'mongoose';
 import { User } from '@modules/account/schemas/user.schema';
-import { AdminUser } from '@modules/account/schemas/admin-user.schema';
+import { AdminUser } from '@modules/admin-user/schemas/admin-user.schema';
 
 export type TaskDocument = Task & Document;
 
