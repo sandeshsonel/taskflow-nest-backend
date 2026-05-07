@@ -7,6 +7,8 @@ import {
 import { AppModule } from './app.module';
 import { WinstonLoggerService } from '@modules';
 
+import { setupSwagger } from './common/swagger/swagger.config';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -34,40 +36,7 @@ async function bootstrap() {
   // ──────────────────────────────────────────────────────
   //  Swagger / OpenAPI Documentation
   // ──────────────────────────────────────────────────────
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('X-Name API')
-    .setDescription(
-      'REST API documentation for the X-Name backend — covering authentication, account management, and more.',
-    )
-    .setVersion('1.0')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        description: 'Enter your JWT token',
-      },
-      'JWT-auth', // security name referenced by @ApiBearerAuth('JWT-auth')
-    )
-    .addTag('App', 'Root endpoint & API metadata')
-    .addTag('Health', 'Liveness, readiness & dependency health checks')
-    .addTag('Account', 'User registration, login & profile management')
-    .addTag('Bug Report', 'Public endpoint for reporting bugs and issues')
-    .addTag('Task', 'Task management and assignments')
-    .build();
-
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-
-  SwaggerModule.setup('api/docs', app, document, {
-    customSiteTitle: 'X-Name API Docs',
-    swaggerOptions: {
-      persistAuthorization: true,
-      docExpansion: 'list',
-      filter: true,
-      tagsSorter: 'alpha',
-      operationsSorter: 'method',
-    },
-  });
+  setupSwagger(app);
 
   await app.listen(process.env.PORT ?? 8000);
 }
