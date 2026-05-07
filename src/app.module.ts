@@ -2,6 +2,13 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import {
+  I18nModule,
+  AcceptLanguageResolver,
+  HeaderResolver,
+  QueryResolver,
+} from 'nestjs-i18n';
+import * as path from 'path';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -20,6 +27,18 @@ const environment = process.env.NODE_ENV || 'development';
       envFilePath: `.env.${environment}`,
       load: configs,
       validate,
+    }),
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: path.join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [
+        { use: QueryResolver, options: ['lang'] },
+        AcceptLanguageResolver,
+        new HeaderResolver(['x-lang']),
+      ],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

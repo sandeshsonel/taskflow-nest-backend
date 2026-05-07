@@ -1,0 +1,15 @@
+{
+  "SIGNUP_SUCCESS": "साइनअप सफल",
+  "SIGNIN_SUCCESS": "साइनइन सफल",
+  "USER_DETAILS_FETCHED": "उपयोगकर्ता विवरण सफलतापूर्वक प्राप्त",
+
+  "EMAIL_ALREADY_REGISTERED": "ईमेल पहले से पंजीकृत है",
+  "EMAIL_REGISTERED_CONTACT_ADMIN": "ईमेल पहले से पंजीकृत है, कृपया व्यवस्थापक से संपर्क करें",
+  "USER_ALREADY_EXISTS": "उपयोगकर्ता पहले से मौजूद है",
+  "USER_NOT_FOUND": "उपयोगकर्ता नहीं मिला",
+  "USER_DETAILS_NOT_FOUND": "उपयोगकर्ता विवरण नहीं मिला",
+
+  "INVALID_CREDENTIALS": "अमान्य क्रेडेंशियल",
+  "INCORRECT_PASSWORD": "गलत पासवर्ड",
+  "ACCOUNT_SUSPENDED": "आपका खाता निलंबित है। कृपया सहायता के लिए व्यवस्थापक से संपर्क करें।"
+}

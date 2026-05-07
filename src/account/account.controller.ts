@@ -5,8 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  ValidationPipe,
-  UsePipes,
 } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { CreateAccountDto } from './dto/create-account.dto';
@@ -15,9 +13,6 @@ import { GoogleAuthDto } from './dto/google-auth.dto';
 import { Public, CurrentUser } from '../auth';
 
 @Controller('account')
-// Accept only DTO-defined fields.
-// Reject unexpected payload properties for cleaner and safer APIs.
-@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 export class AccountController {
   constructor(private readonly accountService: AccountService) { }
 

@@ -1,0 +1,22 @@
+{
+  "REQUIRED": "{property} is required",
+  "INVALID_TYPE": "{property} must be a valid type",
+
+  "STRING_MIN_VALIDATION": "{property} must be at least {constraints.0} characters",
+  "STRING_MAX_VALIDATION": "{property} must not exceed {constraints.0} characters",
+
+  "VALID_EMAIL_ALLOWED": "Please provide a valid email address",
+  "EMAIL_MIN_VALIDATION": "Email must be at least {constraints.0} characters",
+  "EMAIL_MAX_VALIDATION": "Email must not exceed {constraints.0} characters",
+
+  "NAME_MIN_VALIDATION": "Name must be at least {constraints.0} characters",
+  "NAME_MAX_VALIDATION": "Name must not exceed {constraints.0} characters",
+
+  "PASSWORD_MIN_VALIDATION": "Password must be at least {constraints.0} characters",
+  "PASSWORD_MAX_VALIDATION": "Password must not exceed {constraints.0} characters",
+  "PASSWORD_MISMATCH": "Passwords do not match",
+
+  "ROLE_INVALID_VALIDATION": "Role must be one of the following: {constraints.0}",
+
+  "ID_TOKEN_REQUIRED": "ID token is required"
+}

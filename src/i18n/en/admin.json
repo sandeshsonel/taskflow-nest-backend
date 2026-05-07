@@ -1,0 +1,9 @@
+{
+  "DASHBOARD_FETCHED": "Dashboard data fetched successfully",
+  "USER_LIST_FETCHED": "User list fetched successfully",
+  "USER_UPDATED": "User updated successfully",
+  "USER_DELETED": "User deleted successfully",
+  "ADMIN_NOT_FOUND": "Admin not found",
+  "PERMISSION_DENIED": "You do not have permission to perform this action",
+  "INVALID_ADMIN_ROLE": "Invalid admin role"
+}

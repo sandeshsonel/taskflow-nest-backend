@@ -1,0 +1,8 @@
+{
+  "SERVER_ERROR": "An unexpected server error occurred",
+  "TOKEN_MISSING": "Token is missing",
+  "UNAUTHORIZED": "Unauthorized access",
+  "FORBIDDEN": "Access forbidden",
+  "NOT_FOUND": "Resource not found",
+  "BAD_REQUEST": "Bad request"
+}

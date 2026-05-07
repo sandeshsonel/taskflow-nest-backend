@@ -1,0 +1,22 @@
+{
+  "REQUIRED": "{property} आवश्यक है",
+  "INVALID_TYPE": "{property} एक मान्य प्रकार होना चाहिए",
+
+  "STRING_MIN_VALIDATION": "{property} कम से कम {constraints.0} अक्षरों का होना चाहिए",
+  "STRING_MAX_VALIDATION": "{property} {constraints.0} अक्षरों से अधिक नहीं होना चाहिए",
+
+  "VALID_EMAIL_ALLOWED": "कृपया एक मान्य ईमेल पता दें",
+  "EMAIL_MIN_VALIDATION": "ईमेल कम से कम {constraints.0} अक्षरों का होना चाहिए",
+  "EMAIL_MAX_VALIDATION": "ईमेल {constraints.0} अक्षरों से अधिक नहीं होना चाहिए",
+
+  "NAME_MIN_VALIDATION": "नाम कम से कम {constraints.0} अक्षरों का होना चाहिए",
+  "NAME_MAX_VALIDATION": "नाम {constraints.0} अक्षरों से अधिक नहीं होना चाहिए",
+
+  "PASSWORD_MIN_VALIDATION": "पासवर्ड कम से कम {constraints.0} अक्षरों का होना चाहिए",
+  "PASSWORD_MAX_VALIDATION": "पासवर्ड {constraints.0} अक्षरों से अधिक नहीं होना चाहिए",
+  "PASSWORD_MISMATCH": "पासवर्ड मेल नहीं खाते",
+
+  "ROLE_INVALID_VALIDATION": "भूमिका निम्नलिखित में से एक होनी चाहिए: {constraints.0}",
+
+  "ID_TOKEN_REQUIRED": "आईडी टोकन आवश्यक है"
+}

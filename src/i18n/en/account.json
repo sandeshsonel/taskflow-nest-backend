@@ -1,0 +1,15 @@
+{
+  "SIGNUP_SUCCESS": "Signup successful",
+  "SIGNIN_SUCCESS": "Signin successful",
+  "USER_DETAILS_FETCHED": "User details fetched successfully",
+
+  "EMAIL_ALREADY_REGISTERED": "Email already registered",
+  "EMAIL_REGISTERED_CONTACT_ADMIN": "Email already registered, please contact the admin",
+  "USER_ALREADY_EXISTS": "User already exists",
+  "USER_NOT_FOUND": "User not found",
+  "USER_DETAILS_NOT_FOUND": "User details not found",
+
+  "INVALID_CREDENTIALS": "Invalid credentials",
+  "INCORRECT_PASSWORD": "Incorrect password",
+  "ACCOUNT_SUSPENDED": "Your account is suspended. Please contact the administrator for assistance."
+}

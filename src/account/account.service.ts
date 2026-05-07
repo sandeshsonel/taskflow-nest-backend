@@ -9,12 +9,14 @@ import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
+import { I18nService } from 'nestjs-i18n';
 
 import { User, UserDocument } from './schemas/user.schema';
 import { AdminUser, AdminUserDocument } from './schemas/admin-user.schema';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { LoginDto } from './dto/login.dto';
 import { GoogleAuthDto } from './dto/google-auth.dto';
+import { AccountKeys, CommonKeys } from '../common/constants/validation-messages';
 import admin from '../utils/firebase';
 
 @Injectable()
@@ -23,6 +25,7 @@ export class AccountService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(AdminUser.name) private adminUserModel: Model<AdminUserDocument>,
     private jwtService: JwtService,
+    private readonly i18n: I18nService,
   ) { }
 
   async signup(createAccountDto: CreateAccountDto) {
@@ -33,7 +36,9 @@ export class AccountService {
       const existingUser = await this.userModel.findOne({ email });
 
       if (existingUser) {
-        throw new BadRequestException('Email already registered');
+        throw new BadRequestException(
+          this.i18n.t(AccountKeys.EMAIL_ALREADY_REGISTERED),
+        );
       }
 
       const isUser = role === 'user';
@@ -46,7 +51,7 @@ export class AccountService {
 
         if (isAdminUser) {
           throw new BadRequestException(
-            'Email already registered, Please contact admin',
+            this.i18n.t(AccountKeys.EMAIL_REGISTERED_CONTACT_ADMIN),
           );
         }
       }
@@ -72,7 +77,7 @@ export class AccountService {
       });
 
       return {
-        message: 'Signup successful',
+        message: this.i18n.t(AccountKeys.SIGNUP_SUCCESS),
         token,
         user: {
           id: user._id,
@@ -88,27 +93,39 @@ export class AccountService {
         throw error;
       }
 
-      throw new InternalServerErrorException('Server error');
+      throw new InternalServerErrorException(
+        this.i18n.t(CommonKeys.SERVER_ERROR),
+      );
     }
   }
 
   async signupWithGoogle(googleAuthDto: GoogleAuthDto) {
     const { idToken, role } = googleAuthDto;
     try {
-      if (!idToken) throw new BadRequestException('Token missing');
+      if (!idToken) {
+        throw new BadRequestException(
+          this.i18n.t(CommonKeys.TOKEN_MISSING),
+        );
+      }
 
       const decodedToken = await admin.auth().verifyIdToken(idToken);
       const { uid, email, name, picture } = decodedToken;
 
       const userAlreadyExists = await this.userModel.findOne({ email });
-      if (userAlreadyExists) throw new BadRequestException('User already exists');
+      if (userAlreadyExists) {
+        throw new BadRequestException(
+          this.i18n.t(AccountKeys.USER_ALREADY_EXISTS),
+        );
+      }
 
       const isUser = role === 'user';
 
       if (isUser) {
         const isAdminUser = await this.adminUserModel.findOne({ 'users.email': email });
         if (isAdminUser) {
-          throw new BadRequestException('Email already registered, Please contact the admin');
+          throw new BadRequestException(
+            this.i18n.t(AccountKeys.EMAIL_REGISTERED_CONTACT_ADMIN),
+          );
         }
       }
 
@@ -129,7 +146,7 @@ export class AccountService {
       });
 
       return {
-        message: 'Signup success',
+        message: this.i18n.t(AccountKeys.SIGNUP_SUCCESS),
         token,
         user: {
           id: newUser._id,
@@ -142,8 +159,13 @@ export class AccountService {
         },
       };
     } catch (error: any) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       console.error('Error creating user:', error);
-      throw new InternalServerErrorException('Server error');
+      throw new InternalServerErrorException(
+        this.i18n.t(CommonKeys.SERVER_ERROR),
+      );
     }
   }
 
@@ -152,16 +174,22 @@ export class AccountService {
 
     const account = await this.userModel.findOne({ email });
     if (!account || !account.password) {
-      throw new BadRequestException('Invalid credentials');
+      throw new BadRequestException(
+        this.i18n.t(AccountKeys.INVALID_CREDENTIALS),
+      );
     }
 
     if (account.status === 'suspended') {
-      throw new BadRequestException('Your account is suspended. Please contact the administrator for assistance.');
+      throw new BadRequestException(
+        this.i18n.t(AccountKeys.ACCOUNT_SUSPENDED),
+      );
     }
 
     const isMatch = await bcrypt.compare(password, account.password);
     if (!isMatch) {
-      throw new BadRequestException('Incorrect password');
+      throw new BadRequestException(
+        this.i18n.t(AccountKeys.INCORRECT_PASSWORD),
+      );
     }
 
     const token = await this.jwtService.signAsync({
@@ -173,7 +201,7 @@ export class AccountService {
     });
 
     return {
-      message: 'Signin successful',
+      message: this.i18n.t(AccountKeys.SIGNIN_SUCCESS),
       token,
       user: {
         id: account._id,
@@ -190,13 +218,21 @@ export class AccountService {
     const { idToken } = googleAuthDto;
 
     try {
-      if (!idToken) throw new BadRequestException('Token missing');
+      if (!idToken) {
+        throw new BadRequestException(
+          this.i18n.t(CommonKeys.TOKEN_MISSING),
+        );
+      }
 
       const decodedToken = await admin.auth().verifyIdToken(idToken);
 
       const user = await this.userModel.findOne({ email: decodedToken.email });
 
-      if (!user) throw new BadRequestException('User not found');
+      if (!user) {
+        throw new BadRequestException(
+          this.i18n.t(AccountKeys.USER_NOT_FOUND),
+        );
+      }
 
       const token = await this.jwtService.signAsync(
         {
@@ -208,27 +244,34 @@ export class AccountService {
         });
 
       return {
-        message: 'Signin success',
+        message: this.i18n.t(AccountKeys.SIGNIN_SUCCESS),
         token,
         user,
       };
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       console.error('Signin error:', error);
-      throw new InternalServerErrorException('Server error');
+      throw new InternalServerErrorException(
+        this.i18n.t(CommonKeys.SERVER_ERROR),
+      );
     }
   }
 
   async getProfileDetails(email: string) {
     const account = await this.userModel.findOne({ email });
     if (!account) {
-      throw new NotFoundException('User details not found');
+      throw new NotFoundException(
+        this.i18n.t(AccountKeys.USER_DETAILS_NOT_FOUND),
+      );
     }
 
     if (account.status === 'suspended') {
       throw new UnauthorizedException({
         success: false,
         data: { status: 'suspended' },
-        message: 'Your account is suspended. Please contact the administrator for assistance.',
+        message: this.i18n.t(AccountKeys.ACCOUNT_SUSPENDED),
       });
     }
 
@@ -242,7 +285,7 @@ export class AccountService {
         status: account.status,
         createdAt: account.createdAt,
       },
-      message: 'User details fetched successfully',
+      message: this.i18n.t(AccountKeys.USER_DETAILS_FETCHED),
     };
   }
 }
