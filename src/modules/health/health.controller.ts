@@ -9,6 +9,7 @@ import {
 } from '@nestjs/terminus';
 
 import { Public } from '../auth';
+import { PublicRoute } from '../../common/throttler/throttler.decorators';
 import { HealthCheckResponseDto } from './dto/health-response.dto';
 
 /**
@@ -28,6 +29,7 @@ export class HealthController {
   ) {}
 
   @Public()
+  @PublicRoute()
   @Get()
   @HealthCheck()
   @ApiOperation({

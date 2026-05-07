@@ -5,9 +5,11 @@ import { GetUser } from '@common/decorators/get-user.decorator';
 import { JwtPayload } from '@modules/auth/interfaces/jwt-payload.interface';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { PublicThrottle } from '../../common/throttler/throttler.decorators';
 
 @ApiTags('Task')
 @ApiBearerAuth('JWT-auth')
+@PublicThrottle()
 @Controller('task')
 export class TaskController {
     constructor(private readonly taskService: TaskService) { }

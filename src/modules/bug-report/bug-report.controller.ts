@@ -21,6 +21,7 @@ import {
     getSchemaPath,
 } from '@nestjs/swagger';
 import { Public } from '@modules/auth';
+import { StrictThrottle } from '../../common/throttler/throttler.decorators';
 import { BugReportService } from './bug-report.service';
 import { CreateBugReportDto } from './dto/create-bug-report.dto';
 import { diskStorage } from 'multer';
@@ -29,6 +30,7 @@ import { extname } from 'path';
 @ApiTags('Bug Report')
 @ApiExtraModels(CreateBugReportDto)
 @Public()
+@StrictThrottle()
 @Controller('bug-report')
 export class BugReportController {
     constructor(private readonly bugReportService: BugReportService) { }

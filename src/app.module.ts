@@ -8,8 +8,11 @@ import {
   HeaderResolver,
   QueryResolver,
 } from 'nestjs-i18n';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'path';
+import Redis from 'ioredis';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -24,6 +27,7 @@ import {
   NotificationModule,
   LoggerModule
 } from '@modules';
+import { CustomThrottlerGuard } from './common/throttler/throttler.guard';
 
 const FEATURE_MODULES = [
   AuthModule,
@@ -79,10 +83,35 @@ const environment = process.env.NODE_ENV || 'development';
       rootPath: path.join(__dirname, '..', 'uploads', 'bug-attachments'),
       serveRoot: '/bug-attachments',
     }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        throttlers: [
+          {
+            name: 'default',
+            ttl: config.get('throttler.ttl'),
+            limit: config.get('throttler.limit'),
+          },
+        ],
+        storage: config.get('throttler.redis.enabled')
+          ? new ThrottlerStorageRedisService(
+            new Redis({
+              host: config.get('throttler.redis.host'),
+              port: config.get('throttler.redis.port'),
+            }),
+          )
+          : undefined,
+      }),
+    }),
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_GUARD,
+      useClass: CustomThrottlerGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

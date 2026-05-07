@@ -21,8 +21,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CurrentUser } from '../auth';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { InternalThrottle } from '../../common/throttler/throttler.decorators';
 
 @ApiTags('Admin User')
+@InternalThrottle()
 @Controller('admin-user')
 @ApiBearerAuth('JWT-auth')
 export class AdminUserController {

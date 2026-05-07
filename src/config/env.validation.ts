@@ -66,6 +66,18 @@ export class EnvironmentVariables {
   @IsOptional()
   @IsString()
   VERCEL_OIDC_TOKEN?: string;
+
+  @IsOptional()
+  @IsNumber()
+  THROTTLER_TTL?: number;
+
+  @IsOptional()
+  @IsNumber()
+  THROTTLER_LIMIT?: number;
+
+  @IsOptional()
+  @IsString()
+  THROTTLER_REDIS_ENABLED?: string;
 }
 
 export function validate(config: Record<string, unknown>) {
