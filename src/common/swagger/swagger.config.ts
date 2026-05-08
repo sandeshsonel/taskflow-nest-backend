@@ -8,7 +8,7 @@ import { swaggerTags } from './swagger.tags';
  */
 export function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
-    .setTitle('X-Name API')
+    .setTitle('TaskFlow Nest API')
     .setDescription(
       'REST API documentation for the X-Name backend — covering authentication, account management, and more.',
     )
@@ -30,8 +30,16 @@ export function setupSwagger(app: INestApplication): void {
 
   const document = SwaggerModule.createDocument(app, config.build());
 
-  SwaggerModule.setup('api/docs', app, document, {
+
+  SwaggerModule.setup('api-docs', app, document, {
     customSiteTitle: 'X-Name API Docs',
+    customJs: [
+      '/swagger-static/swagger-ui-bundle.js',
+      '/swagger-static/swagger-ui-standalone-preset.js',
+    ],
+    customCssUrl: [
+      '/swagger-static/swagger-ui.css',
+    ],
     swaggerOptions: {
       persistAuthorization: true,
       docExpansion: 'list',

@@ -32,7 +32,7 @@ describe('AppController', () => {
     it('should return API metadata with expected fields', () => {
       const result = appController.getRoot();
 
-      expect(result).toHaveProperty('name', 'X-Name API');
+      expect(result).toHaveProperty('name', 'TaskFlow Nest API');
       expect(result).toHaveProperty('version', '1.0.0');
       expect(result).toHaveProperty('environment', 'test');
       expect(result).toHaveProperty('docs', '/api/docs');

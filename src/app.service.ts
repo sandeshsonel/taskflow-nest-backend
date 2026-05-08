@@ -12,10 +12,10 @@ export class AppService {
    */
   getApiInfo() {
     return {
-      name: 'X-Name API',
+      name: 'TaskFlow Nest API',
       version: '1.0.0',
       environment: this.config.get<string>('app.environment', 'development'),
-      docs: '/api/docs',
+      docs: '/api-docs',
       timestamp: new Date().toISOString(),
     };
   }

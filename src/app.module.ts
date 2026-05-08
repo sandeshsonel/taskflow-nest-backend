@@ -84,6 +84,10 @@ const environment = process.env.NODE_ENV || 'development';
       rootPath: path.join(__dirname, '..', 'uploads', 'bug-attachments'),
       serveRoot: '/bug-attachments',
     }),
+    ServeStaticModule.forRoot({
+      rootPath: path.dirname(require.resolve('swagger-ui-dist/package.json')),
+      serveRoot: '/swagger-static',
+    }),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
