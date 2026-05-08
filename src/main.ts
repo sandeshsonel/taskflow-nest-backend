@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { I18nValidationExceptionFilter, I18nValidationPipe } from 'nestjs-i18n';
@@ -24,6 +24,13 @@ async function bootstrap() {
     // ──────────────────────────────────────────────────────
     //  Configurations
     // ──────────────────────────────────────────────────────
+    app.setGlobalPrefix('api');
+
+    app.enableVersioning({
+      type: VersioningType.URI,
+      defaultVersion: '1',
+    });
+
     setupCors(app);
     setupSwagger(app);
 

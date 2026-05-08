@@ -12,7 +12,7 @@ export function setupSwagger(app: INestApplication): void {
     .setDescription(
       'REST API documentation for the X-Name backend — covering authentication, account management, and more.',
     )
-    .setVersion('1.0')
+    .setVersion('1.0.0')
     .addBearerAuth(
       {
         type: 'http',
@@ -31,7 +31,7 @@ export function setupSwagger(app: INestApplication): void {
   const document = SwaggerModule.createDocument(app, config.build());
 
 
-  SwaggerModule.setup('api-docs', app, document, {
+  SwaggerModule.setup('api/docs', app, document, {
     customSiteTitle: 'X-Name API Docs',
     customJs: [
       '/swagger-static/swagger-ui-bundle.js',

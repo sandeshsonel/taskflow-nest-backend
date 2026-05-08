@@ -87,6 +87,8 @@ npm run start:prod
 Once the server is running, you can access the interactive Swagger documentation at:
 🔗 [http://localhost:8000/api/docs](http://localhost:8000/api/docs)
 
+All API endpoints are prefixed with `/api/v1` (e.g., `http://localhost:8000/api/v1/auth/login`).
+
 ---
 
 ## 📂 Project Structure
