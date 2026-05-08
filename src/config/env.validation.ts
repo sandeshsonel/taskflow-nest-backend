@@ -70,10 +70,6 @@ export class EnvironmentVariables {
   CONTENT_CACHE_DURATION_MILLIS: number;
 
   @IsOptional()
-  @IsString()
-  VERCEL_OIDC_TOKEN?: string;
-
-  @IsOptional()
   @IsNumber()
   THROTTLER_TTL?: number;
 
@@ -84,6 +80,22 @@ export class EnvironmentVariables {
   @IsOptional()
   @IsString()
   THROTTLER_REDIS_ENABLED?: string;
+
+  @IsOptional()
+  @IsString()
+  FIREBASE_SERVICE_ACCOUNT?: string;
+
+  @IsOptional()
+  @IsString()
+  FIREBASE_PROJECT_ID?: string;
+
+  @IsOptional()
+  @IsString()
+  FIREBASE_CLIENT_EMAIL?: string;
+
+  @IsOptional()
+  @IsString()
+  FIREBASE_PRIVATE_KEY?: string;
 }
 
 export function validate(config: Record<string, unknown>) {

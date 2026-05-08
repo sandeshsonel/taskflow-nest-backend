@@ -8,5 +8,7 @@ export default registerAs('database', () => ({
   options: {
     minPoolSize: parseInt(process.env.MONGO_MIN_POOL_SIZE || '5', 10),
     maxPoolSize: parseInt(process.env.MONGO_MAX_POOL_SIZE || '10', 10),
+    serverSelectionTimeoutMS: 10_000, // Fail fast if no server is found within 10s
+    connectTimeoutMS: 10_000, // Timeout individual socket connections after 10s
   },
 }));

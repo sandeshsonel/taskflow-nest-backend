@@ -27,7 +27,9 @@ import {
   NotificationModule,
   LoggerModule,
 } from '@modules';
+import { StartupDependencyService } from './common/startup/startup-dependency.service';
 import { CustomThrottlerGuard } from './common/throttler/throttler.guard';
+import { configs, validate } from './config';
 
 const FEATURE_MODULES = [
   AuthModule,
@@ -39,8 +41,6 @@ const FEATURE_MODULES = [
   NotificationModule,
   LoggerModule,
 ];
-
-import { configs, validate } from './config';
 
 const environment = process.env.NODE_ENV || 'development';
 
@@ -70,6 +70,7 @@ const environment = process.env.NODE_ENV || 'development';
         const uri = configService.get<string>('database.uri');
         const dbName = configService.get<string>('database.name');
         const options = configService.get<any>('database.options');
+
         return {
           uri,
           dbName,
@@ -108,6 +109,7 @@ const environment = process.env.NODE_ENV || 'development';
   controllers: [AppController],
   providers: [
     AppService,
+    StartupDependencyService,
     {
       provide: APP_GUARD,
       useClass: CustomThrottlerGuard,
