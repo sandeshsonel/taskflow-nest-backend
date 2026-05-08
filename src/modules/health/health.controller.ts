@@ -11,6 +11,7 @@ import {
 import { Public } from '../auth';
 import { PublicRoute } from '../../common/throttler/throttler.decorators';
 import { HealthCheckResponseDto } from './dto/health-response.dto';
+import { DEFAULT_API_VERSION } from '@common/constants';
 
 /**
  * Exposes application health information for load-balancers,
@@ -19,7 +20,7 @@ import { HealthCheckResponseDto } from './dto/health-response.dto';
  * GET /health → aggregated health of all critical dependencies.
  */
 @ApiTags('Health')
-@Controller('health')
+@Controller({ path: 'health', version: DEFAULT_API_VERSION })
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,

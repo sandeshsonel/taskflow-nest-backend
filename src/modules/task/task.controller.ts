@@ -25,11 +25,12 @@ import { JwtPayload } from '@modules/auth/interfaces/jwt-payload.interface';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { PublicThrottle } from '../../common/throttler/throttler.decorators';
+import { DEFAULT_API_VERSION } from '@common/constants';
 
 @ApiTags('Task')
 @ApiBearerAuth('JWT-auth')
 @PublicThrottle()
-@Controller('task')
+@Controller({ path: 'task', version: DEFAULT_API_VERSION })
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 

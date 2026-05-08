@@ -3,9 +3,10 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { AppService } from './app.service';
 import { Public } from '@modules/auth';
+import { DEFAULT_API_VERSION } from '@common/constants';
 
 @ApiTags('App')
-@Controller()
+@Controller({ version: DEFAULT_API_VERSION })
 export class AppController {
   constructor(private readonly appService: AppService) {}
 

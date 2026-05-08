@@ -1,6 +1,7 @@
 import { Logger, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ConfigService } from '@nestjs/config';
 import { I18nValidationExceptionFilter, I18nValidationPipe } from 'nestjs-i18n';
 
 import { AppModule } from './app.module';
@@ -24,11 +25,15 @@ async function bootstrap() {
     // ──────────────────────────────────────────────────────
     //  Configurations
     // ──────────────────────────────────────────────────────
-    app.setGlobalPrefix('api');
+    const configService = app.get(ConfigService);
+    const apiPrefix = configService.get<string>('app.apiPrefix', 'api');
+    const apiVersion = configService.get<string>('app.apiVersion', '1');
+
+    app.setGlobalPrefix(apiPrefix);
 
     app.enableVersioning({
       type: VersioningType.URI,
-      defaultVersion: '1',
+      defaultVersion: apiVersion,
     });
 
     setupCors(app);

@@ -22,9 +22,10 @@ import {
   StrictThrottle,
   RegistrationThrottle,
 } from '../../common/throttler/throttler.decorators';
+import { DEFAULT_API_VERSION } from '../../common/constants';
 
 @ApiTags('Account')
-@Controller('account')
+@Controller({ path: 'account', version: DEFAULT_API_VERSION })
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 

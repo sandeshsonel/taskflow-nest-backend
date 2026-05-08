@@ -6,7 +6,6 @@ import {
   Delete,
   Body,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -22,10 +21,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CurrentUser } from '../auth';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { InternalThrottle } from '../../common/throttler/throttler.decorators';
+import { DEFAULT_API_VERSION } from '@common/constants';
 
 @ApiTags('Admin User')
 @InternalThrottle()
-@Controller('admin-user')
+@Controller({ path: 'admin-user', version: DEFAULT_API_VERSION })
 @ApiBearerAuth('JWT-auth')
 export class AdminUserController {
   constructor(private readonly adminUserService: AdminUserService) {}

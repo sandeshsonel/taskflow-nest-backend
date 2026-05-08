@@ -26,12 +26,13 @@ import { BugReportService } from './bug-report.service';
 import { CreateBugReportDto } from './dto/create-bug-report.dto';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { DEFAULT_API_VERSION } from '@common/constants';
 
 @ApiTags('Bug Report')
 @ApiExtraModels(CreateBugReportDto)
 @Public()
 @StrictThrottle()
-@Controller('bug-report')
+@Controller({ path: 'bug-report', version: DEFAULT_API_VERSION })
 export class BugReportController {
   constructor(private readonly bugReportService: BugReportService) {}
 

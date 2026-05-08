@@ -11,11 +11,12 @@ export class AppService {
    * identity and discover the docs URL.
    */
   getApiInfo() {
+    const apiPrefix = this.config.get<string>('app.apiPrefix', 'api');
     return {
       name: 'TaskFlow Nest API',
-      version: '1.0.0',
+      version: this.config.get<string>('app.version', '1.0.0'),
       environment: this.config.get<string>('app.environment', 'development'),
-      docs: '/api/docs',
+      docs: `/${apiPrefix}/docs`,
       timestamp: new Date().toISOString(),
     };
   }
