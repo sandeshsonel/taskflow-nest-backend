@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export type UserDocument = User & Document;
 
@@ -11,6 +11,12 @@ export class User {
   @Prop({ required: false })
   fullName?: string;
 
+  @Prop({ required: false })
+  firstName?: string;
+
+  @Prop({ required: false })
+  lastName?: string;
+
   @Prop({ required: true, unique: true, lowercase: true })
   email: string;
 
@@ -20,11 +26,23 @@ export class User {
   @Prop({ required: false })
   photoURL?: string;
 
-  @Prop({ enum: ['admin', 'user'], default: 'user' })
+  @Prop({ enum: ['admin', 'user', 'editor', 'viewer'], default: 'user' })
   role: string;
 
-  @Prop({ enum: ['active', 'suspended'], default: 'active' })
+  @Prop({ enum: ['active', 'suspended', 'invited'], default: 'active' })
   status: string;
+
+  @Prop({ default: true })
+  active?: boolean;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', default: null })
+  adminId?: string;
+
+  @Prop({ default: null })
+  joinedAt?: Date;
+
+  @Prop({ default: null })
+  lastLogin?: Date;
 
   createdAt?: Date;
   updatedAt?: Date;

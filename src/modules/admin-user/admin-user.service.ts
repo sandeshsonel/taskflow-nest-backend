@@ -6,7 +6,6 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
-import { AdminUser, AdminUserDocument } from './schemas/admin-user.schema';
 import { User, UserDocument } from '../account/schemas/user.schema';
 import {
   Notifications,
@@ -26,8 +25,6 @@ import { WinstonLoggerService } from '../logger/logger.service';
 @Injectable()
 export class AdminUserService {
   constructor(
-    @InjectModel(AdminUser.name)
-    private adminUserModel: Model<AdminUserDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Notifications.name)
     private notificationModel: Model<NotificationDocument>,
@@ -37,7 +34,7 @@ export class AdminUserService {
   ) {}
 
   async getUsersList(adminId: string) {
-    const users = await this.adminUserModel
+    const users = await this.userModel
       .find({ adminId })
       .select('-password -__v');
     return users;
@@ -56,17 +53,12 @@ export class AdminUserService {
     }
 
     const existingUser = await this.userModel.findOne({ email });
-    if (existingUser && existingUser.role === 'admin') {
-      throw new BadRequestException(
-        this.i18n.t(AdminKeys.ADMIN_ALREADY_REGISTERED),
-      );
-    }
-
-    const isAlreadyInAdminUsers = await this.adminUserModel.findOne({
-      email,
-    });
-
-    if (isAlreadyInAdminUsers) {
+    if (existingUser) {
+      if (existingUser.adminId) {
+        throw new BadRequestException(
+          this.i18n.t(AccountKeys.EMAIL_REGISTERED_CONTACT_ADMIN),
+        );
+      }
       throw new BadRequestException(
         this.i18n.t(AccountKeys.EMAIL_ALREADY_REGISTERED),
       );
@@ -76,15 +68,12 @@ export class AdminUserService {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     try {
-      const normalUser = await this.userModel.findOne({ email });
-
-      const newUser = await this.adminUserModel.create({
+      const newUser = await this.userModel.create({
         adminId,
         firstName,
         lastName,
         email,
         role,
-        userId: normalUser ? String(normalUser._id) : null,
         password: hashedPassword,
         active: true,
         status: 'invited',
@@ -121,7 +110,7 @@ export class AdminUserService {
     userId: string,
     updateUserDto: UpdateUserDto,
   ) {
-    const isUserExists = await this.adminUserModel.findOne({
+    const isUserExists = await this.userModel.findOne({
       adminId,
       _id: userId,
     });
@@ -138,7 +127,7 @@ export class AdminUserService {
     }
 
     try {
-      await this.adminUserModel.findOneAndUpdate(
+      await this.userModel.findOneAndUpdate(
         { adminId, _id: userId },
         { $set: updateData },
         { new: true },
@@ -156,7 +145,7 @@ export class AdminUserService {
       throw new BadRequestException(this.i18n.t(AdminKeys.USER_ID_REQUIRED));
     }
 
-    const isUserExists = await this.adminUserModel.findOne({
+    const isUserExists = await this.userModel.findOne({
       adminId,
       _id: userId,
     });
@@ -165,7 +154,7 @@ export class AdminUserService {
       throw new NotFoundException(this.i18n.t(AdminKeys.USER_NOT_FOUND));
     }
 
-    await this.adminUserModel.findOneAndDelete({ adminId, _id: userId });
+    await this.userModel.findOneAndDelete({ adminId, _id: userId });
 
     return { message: this.i18n.t(AdminKeys.USER_DELETED) };
   }
@@ -175,10 +164,8 @@ export class AdminUserService {
       const last7Days = getLastNDays(7);
       const prev14Days = getLastNDays(14);
 
-      const users = await this.adminUserModel.find({ adminId });
-      const normalUserIds = users
-        .map((u: any) => u.userId)
-        .filter((id) => id != null);
+      const users = await this.userModel.find({ adminId });
+      const normalUserIds = users.map((u: any) => u._id);
 
       const totalUsers = users.length;
       const currentNewSignups = users.filter(

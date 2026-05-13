@@ -12,10 +12,6 @@ import { JwtService } from '@nestjs/jwt';
 import { I18nService } from 'nestjs-i18n';
 
 import { User, UserDocument } from './schemas/user.schema';
-import {
-  AdminUser,
-  AdminUserDocument,
-} from '../admin-user/schemas/admin-user.schema';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { LoginDto } from './dto/login.dto';
 import { GoogleAuthDto } from './dto/google-auth.dto';
@@ -30,8 +26,6 @@ import { WinstonLoggerService } from '../logger/logger.service';
 export class AccountService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    @InjectModel(AdminUser.name)
-    private adminUserModel: Model<AdminUserDocument>,
     private jwtService: JwtService,
     private readonly i18n: I18nService,
     private readonly logger: WinstonLoggerService,
@@ -45,24 +39,14 @@ export class AccountService {
       const existingUser = await this.userModel.findOne({ email });
 
       if (existingUser) {
-        throw new BadRequestException(
-          this.i18n.t(AccountKeys.EMAIL_ALREADY_REGISTERED),
-        );
-      }
-
-      const isUser = role === 'user';
-
-      // ✅ Check admin users collection
-      if (isUser) {
-        const isAdminUser = await this.adminUserModel.findOne({
-          email,
-        });
-
-        if (isAdminUser) {
+        if (existingUser.adminId) {
           throw new BadRequestException(
             this.i18n.t(AccountKeys.EMAIL_REGISTERED_CONTACT_ADMIN),
           );
         }
+        throw new BadRequestException(
+          this.i18n.t(AccountKeys.EMAIL_ALREADY_REGISTERED),
+        );
       }
 
       // ✅ Hash password
@@ -120,22 +104,14 @@ export class AccountService {
 
       const userAlreadyExists = await this.userModel.findOne({ email });
       if (userAlreadyExists) {
-        throw new BadRequestException(
-          this.i18n.t(AccountKeys.USER_ALREADY_EXISTS),
-        );
-      }
-
-      const isUser = role === 'user';
-
-      if (isUser) {
-        const isAdminUser = await this.adminUserModel.findOne({
-          email,
-        });
-        if (isAdminUser) {
+        if (userAlreadyExists.adminId) {
           throw new BadRequestException(
             this.i18n.t(AccountKeys.EMAIL_REGISTERED_CONTACT_ADMIN),
           );
         }
+        throw new BadRequestException(
+          this.i18n.t(AccountKeys.USER_ALREADY_EXISTS),
+        );
       }
 
       const newUser = await this.userModel.create({
