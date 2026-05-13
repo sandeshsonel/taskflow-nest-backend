@@ -170,6 +170,15 @@ export class AdminUserService {
       throw new BadRequestException(this.i18n.t(AdminKeys.USER_ID_REQUIRED));
     }
 
+    const isUserExists = await this.adminUserModel.findOne({
+      adminId,
+      'users._id': userId,
+    });
+
+    if (!isUserExists) {
+      throw new NotFoundException(this.i18n.t(AdminKeys.USER_NOT_FOUND));
+    }
+
     await this.adminUserModel.findOneAndUpdate(
       { adminId },
       { $pull: { users: { _id: userId } } },
