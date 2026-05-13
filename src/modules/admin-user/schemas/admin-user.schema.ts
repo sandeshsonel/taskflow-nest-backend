@@ -39,7 +39,7 @@ export class SubUser {
   lastLogin?: Date;
 
   @Prop({ required: true })
-  password?: string;
+  password: string;
 }
 
 const SubUserSchema = SchemaFactory.createForClass(SubUser);
