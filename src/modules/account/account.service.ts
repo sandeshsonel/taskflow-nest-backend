@@ -35,7 +35,6 @@ export class AccountService {
     const { name, email, password, role } = createAccountDto;
 
     try {
-      // ✅ Check existing user
       const existingUser = await this.userModel.findOne({ email });
 
       if (existingUser) {
@@ -49,10 +48,8 @@ export class AccountService {
         );
       }
 
-      // ✅ Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // ✅ Create user
       const user = await this.userModel.create({
         fullName: name,
         email,
@@ -60,7 +57,6 @@ export class AccountService {
         role: role || 'user',
       });
 
-      // ✅ Generate JWT token
       const token = await this.jwtService.signAsync({
         id: user._id,
         fullName: user.fullName,
