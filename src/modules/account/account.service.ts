@@ -55,7 +55,7 @@ export class AccountService {
       // ✅ Check admin users collection
       if (isUser) {
         const isAdminUser = await this.adminUserModel.findOne({
-          'users.email': email,
+          email,
         });
 
         if (isAdminUser) {
@@ -129,7 +129,7 @@ export class AccountService {
 
       if (isUser) {
         const isAdminUser = await this.adminUserModel.findOne({
-          'users.email': email,
+          email,
         });
         if (isAdminUser) {
           throw new BadRequestException(

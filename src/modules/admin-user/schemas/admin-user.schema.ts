@@ -4,8 +4,9 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 export type AdminUserDocument = AdminUser & Document;
 
 @Schema({ timestamps: true })
-export class SubUser {
-  _id: any;
+export class AdminUser {
+  @Prop({ required: true })
+  adminId: string;
 
   @Prop({ required: true })
   firstName: string;
@@ -40,17 +41,6 @@ export class SubUser {
 
   @Prop({ required: true })
   password: string;
-}
-
-const SubUserSchema = SchemaFactory.createForClass(SubUser);
-
-@Schema({ timestamps: true })
-export class AdminUser {
-  @Prop({ required: true, unique: true })
-  adminId: string;
-
-  @Prop({ type: [SubUserSchema] })
-  users: SubUser[];
 }
 
 export const AdminUserSchema = SchemaFactory.createForClass(AdminUser);

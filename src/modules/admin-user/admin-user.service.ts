@@ -37,10 +37,10 @@ export class AdminUserService {
   ) {}
 
   async getUsersList(adminId: string) {
-    const adminUser = await this.adminUserModel
-      .findOne({ adminId })
-      .select(['-users.password', '-__v']);
-    return adminUser?.users || [];
+    const users = await this.adminUserModel
+      .find({ adminId })
+      .select('-password -__v');
+    return users;
   }
 
   async createUser(
@@ -63,7 +63,7 @@ export class AdminUserService {
     }
 
     const isAlreadyInAdminUsers = await this.adminUserModel.findOne({
-      'users.email': email,
+      email,
     });
 
     if (isAlreadyInAdminUsers) {
@@ -78,28 +78,19 @@ export class AdminUserService {
     try {
       const normalUser = await this.userModel.findOne({ email });
 
-      const adminUser = await this.adminUserModel.findOneAndUpdate(
-        { adminId },
-        {
-          $push: {
-            users: {
-              firstName,
-              lastName,
-              email,
-              role,
-              userId: normalUser?._id ?? null,
-              password: hashedPassword,
-              active: true,
-              status: 'invited',
-              joinedAt: null,
-              lastLogin: null,
-            },
-          },
-        },
-        { new: true, upsert: true },
-      );
-
-      const lastAddedUser = adminUser?.users[adminUser.users.length - 1];
+      const newUser = await this.adminUserModel.create({
+        adminId,
+        firstName,
+        lastName,
+        email,
+        role,
+        userId: normalUser ? String(normalUser._id) : null,
+        password: hashedPassword,
+        active: true,
+        status: 'invited',
+        joinedAt: null,
+        lastLogin: null,
+      });
 
       const notificationData = {
         message: this.i18n.t(AdminKeys.USER_INVITE_NOTIFICATION, {
@@ -108,7 +99,7 @@ export class AdminUserService {
         actionType: 'invite',
         actionData: {
           adminId: String(adminId),
-          userId: String(lastAddedUser?._id),
+          userId: String(newUser?._id),
         },
       };
 
@@ -132,7 +123,7 @@ export class AdminUserService {
   ) {
     const isUserExists = await this.adminUserModel.findOne({
       adminId,
-      'users._id': userId,
+      _id: userId,
     });
 
     if (!isUserExists) {
@@ -147,14 +138,9 @@ export class AdminUserService {
     }
 
     try {
-      const updateFields: Record<string, any> = {};
-      for (const [key, value] of Object.entries(updateData)) {
-        updateFields[`users.$.${key}`] = value;
-      }
-
       await this.adminUserModel.findOneAndUpdate(
-        { adminId, 'users._id': userId },
-        { $set: updateFields },
+        { adminId, _id: userId },
+        { $set: updateData },
         { new: true },
       );
 
@@ -172,17 +158,14 @@ export class AdminUserService {
 
     const isUserExists = await this.adminUserModel.findOne({
       adminId,
-      'users._id': userId,
+      _id: userId,
     });
 
     if (!isUserExists) {
       throw new NotFoundException(this.i18n.t(AdminKeys.USER_NOT_FOUND));
     }
 
-    await this.adminUserModel.findOneAndUpdate(
-      { adminId },
-      { $pull: { users: { _id: userId } } },
-    );
+    await this.adminUserModel.findOneAndDelete({ adminId, _id: userId });
 
     return { message: this.i18n.t(AdminKeys.USER_DELETED) };
   }
@@ -192,12 +175,7 @@ export class AdminUserService {
       const last7Days = getLastNDays(7);
       const prev14Days = getLastNDays(14);
 
-      const admin = await this.adminUserModel.findOne({ adminId });
-      if (!admin) {
-        return {};
-      }
-
-      const users = admin.users;
+      const users = await this.adminUserModel.find({ adminId });
       const normalUserIds = users
         .map((u: any) => u.userId)
         .filter((id) => id != null);
@@ -215,59 +193,31 @@ export class AdminUserService {
       ).length;
 
       // ACTIVE TASKS NOW
-      const activeTasksNow = await this.taskModel.aggregate([
-        { $unwind: '$tasks' },
-        {
-          $match: {
-            'tasks.assignTo': { $in: normalUserIds },
-            'tasks.status': { $in: ['pending', 'in-progress'] },
-          },
-        },
-        { $count: 'total' },
-      ]);
-      const activeTasksCount = activeTasksNow[0]?.total || 0;
+      const activeTasksCount = await this.taskModel.countDocuments({
+        assignTo: { $in: normalUserIds },
+        status: { $in: ['pending', 'in-progress'] },
+      });
 
       // ACTIVE TASKS LAST WEEK
-      const activeTasksPrev = await this.taskModel.aggregate([
-        { $unwind: '$tasks' },
-        {
-          $match: {
-            'tasks.assignTo': { $in: normalUserIds },
-            'tasks.status': { $in: ['pending', 'in-progress'] },
-            'tasks.updatedAt': { $lt: last7Days },
-          },
-        },
-        { $count: 'total' },
-      ]);
-      const activeTasksPrevCount = activeTasksPrev[0]?.total || 0;
+      const activeTasksPrevCount = await this.taskModel.countDocuments({
+        assignTo: { $in: normalUserIds },
+        status: { $in: ['pending', 'in-progress'] },
+        updatedAt: { $lt: last7Days },
+      });
 
       // COMPLETED THIS WEEK
-      const completedThisWeekAgg = await this.taskModel.aggregate([
-        { $unwind: '$tasks' },
-        {
-          $match: {
-            'tasks.assignTo': { $in: normalUserIds },
-            'tasks.status': 'completed',
-            'tasks.updatedAt': { $gte: last7Days },
-          },
-        },
-        { $count: 'total' },
-      ]);
-      const completedThisWeekCount = completedThisWeekAgg[0]?.total || 0;
+      const completedThisWeekCount = await this.taskModel.countDocuments({
+        assignTo: { $in: normalUserIds },
+        status: 'completed',
+        updatedAt: { $gte: last7Days },
+      });
 
       // COMPLETED LAST WEEK
-      const completedLastWeekAgg = await this.taskModel.aggregate([
-        { $unwind: '$tasks' },
-        {
-          $match: {
-            'tasks.assignTo': { $in: normalUserIds },
-            'tasks.status': 'completed',
-            'tasks.updatedAt': { $gte: prev14Days, $lt: last7Days },
-          },
-        },
-        { $count: 'total' },
-      ]);
-      const completedLastWeekCount = completedLastWeekAgg[0]?.total || 0;
+      const completedLastWeekCount = await this.taskModel.countDocuments({
+        assignTo: { $in: normalUserIds },
+        status: 'completed',
+        updatedAt: { $gte: prev14Days, $lt: last7Days },
+      });
 
       return {
         totalUsers,

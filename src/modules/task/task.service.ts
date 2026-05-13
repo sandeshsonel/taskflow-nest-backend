@@ -8,7 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { I18nService } from 'nestjs-i18n';
 
-import { Task, TaskDocument, TaskItem } from './schemas/task.schema';
+import { Task, TaskDocument } from './schemas/task.schema';
 import { User, UserDocument } from '@modules/account/schemas/user.schema';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -26,15 +26,12 @@ export class TaskService {
   ) {}
 
   async getTaskById(taskId: string, userId: string) {
-    const userTask = await this.taskModel.findOne(
-      {
-        userId: new Types.ObjectId(userId),
-        'tasks._id': new Types.ObjectId(taskId),
-      },
-      { 'tasks.$': 1 },
-    );
+    const task = await this.taskModel.findOne({
+      _id: new Types.ObjectId(taskId),
+      userId: new Types.ObjectId(userId),
+    });
 
-    if (!userTask || !userTask.tasks.length) {
+    if (!task) {
       throw new NotFoundException(
         this.i18n.t(TaskKeys.NOT_FOUND, {
           args: { id: taskId },
@@ -42,7 +39,7 @@ export class TaskService {
       );
     }
 
-    return userTask.tasks[0];
+    return task;
   }
 
   async getTaskList(
@@ -54,83 +51,41 @@ export class TaskService {
     const skip = (page - 1) * limit;
     const userId = user.id;
 
-    let tasks: (TaskItem & { createdAt?: Date; assignBy?: any })[] = [];
+    let query: any = {};
 
     if (isAdmin) {
-      const userTask = await this.taskModel.findOne({
-        userId: new Types.ObjectId(userId),
-      });
-      tasks = (userTask?.tasks as any) ?? [];
+      query = { userId: new Types.ObjectId(userId) };
     } else {
-      const userTaskAgg = await this.taskModel.aggregate([
-        {
-          $match: {
-            'tasks.assignTo': new Types.ObjectId(userId),
-          },
-        },
-        {
-          $addFields: {
-            tasks: {
-              $filter: {
-                input: '$tasks',
-                as: 't',
-                cond: { $eq: ['$$t.assignTo', new Types.ObjectId(userId)] },
-              },
-            },
-          },
-        },
-        {
-          $lookup: {
-            from: 'users',
-            let: { uid: '$userId' },
-            pipeline: [
-              { $match: { $expr: { $eq: ['$_id', '$$uid'] } } },
-              { $project: { _id: 1, fullName: 1 } },
-            ],
-            as: 'assignBy',
-          },
-        },
-        { $unwind: '$assignBy' },
-        {
-          $addFields: {
-            tasks: {
-              $map: {
-                input: '$tasks',
-                as: 't',
-                in: {
-                  $mergeObjects: ['$$t', { assignBy: '$assignBy' }],
-                },
-              },
-            },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            tasks: 1,
-          },
-        },
-        { $unwind: '$tasks' },
-        { $replaceWith: '$tasks' },
-      ]);
-      tasks = userTaskAgg;
+      query = { assignTo: new Types.ObjectId(userId) };
     }
 
-    tasks.sort((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return dateB - dateA;
-    });
+    const tasks = await this.taskModel
+      .find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
-    const paginated = tasks.slice(skip, skip + limit);
+    // Look up assignBy if needed (using user's fullName)
+    if (!isAdmin) {
+      const userIds = tasks.map((t) => t.userId);
+      const assignByUsers = await this.userModel.find({ _id: { $in: userIds as any[] } }, { fullName: 1 }).lean();
+      const userMap = new Map(assignByUsers.map((u: any) => [u._id.toString(), u]));
+
+      for (const t of tasks) {
+        (t as any).assignBy = userMap.get(t.userId.toString()) || null;
+      }
+    }
+
+    const total = await this.taskModel.countDocuments(query);
 
     return {
-      data: paginated,
+      data: tasks,
       page,
       limit,
-      total: tasks.length,
-      totalPages: Math.ceil(tasks.length / limit),
-      hasMore: skip + limit < tasks.length,
+      total,
+      totalPages: Math.ceil(total / limit),
+      hasMore: skip + limit < total,
     };
   }
 
@@ -143,7 +98,7 @@ export class TaskService {
 
     if (isAdminUser) {
       const adminTask = await this.taskModel.findOne(
-        { 'tasks.assignTo': new Types.ObjectId(createUserId) },
+        { assignTo: new Types.ObjectId(createUserId) },
         { userId: 1, _id: 0 },
       );
       if (adminTask) {
@@ -156,16 +111,13 @@ export class TaskService {
     try {
       const taskData = {
         ...createTaskDto,
+        userId: new Types.ObjectId(createUserId),
         assignTo: createTaskDto.assignTo
           ? new Types.ObjectId(createTaskDto.assignTo)
           : new Types.ObjectId(user.id),
       };
 
-      await this.taskModel.findOneAndUpdate(
-        { userId: new Types.ObjectId(createUserId) },
-        { $push: { tasks: taskData } },
-        { new: true, upsert: true },
-      );
+      await this.taskModel.create(taskData);
 
       return {
         success: true,
@@ -185,15 +137,12 @@ export class TaskService {
   ) {
     const updateTaskUserId = adminId ? adminId : user.id;
 
-    const userTask = await this.taskModel.findOne(
-      {
-        userId: new Types.ObjectId(updateTaskUserId),
-        'tasks._id': new Types.ObjectId(taskId),
-      },
-      { 'tasks.$': 1 },
-    );
+    const task = await this.taskModel.findOne({
+      _id: new Types.ObjectId(taskId),
+      userId: new Types.ObjectId(updateTaskUserId),
+    });
 
-    if (!userTask) {
+    if (!task) {
       throw new NotFoundException(
         this.i18n.t(TaskKeys.NOT_FOUND, {
           args: { id: taskId },
@@ -202,23 +151,15 @@ export class TaskService {
     }
 
     try {
-      const updateFields: Record<string, any> = {};
-      for (const [key, value] of Object.entries(updateTaskDto)) {
-        if (value !== undefined) {
-          if (key === 'assignTo' && value) {
-            updateFields[`tasks.$.${key}`] = new Types.ObjectId(
-              value as string,
-            );
-          } else {
-            updateFields[`tasks.$.${key}`] = value;
-          }
-        }
+      const updateFields: Record<string, any> = { ...updateTaskDto };
+      if (updateFields.assignTo) {
+        updateFields.assignTo = new Types.ObjectId(updateFields.assignTo as string);
       }
 
       await this.taskModel.findOneAndUpdate(
         {
+          _id: new Types.ObjectId(taskId),
           userId: new Types.ObjectId(updateTaskUserId),
-          'tasks._id': new Types.ObjectId(taskId),
         },
         { $set: updateFields },
         { new: true },
@@ -249,12 +190,10 @@ export class TaskService {
       );
     }
 
-    await this.taskModel.findOneAndUpdate(
-      { userId: new Types.ObjectId(user.id) },
-      {
-        $pull: { tasks: { _id: new Types.ObjectId(taskId) } },
-      },
-    );
+    await this.taskModel.findOneAndDelete({
+      _id: new Types.ObjectId(taskId),
+      userId: new Types.ObjectId(user.id),
+    });
 
     return {
       success: true,
