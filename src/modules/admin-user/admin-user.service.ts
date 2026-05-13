@@ -179,32 +179,53 @@ export class AdminUserService {
         (u: any) => u.joinedAt && u.joinedAt < last7Days,
       ).length;
 
-      // ACTIVE TASKS NOW
-      const activeTasksCount = await this.taskModel.countDocuments({
-        assignTo: { $in: normalUserIds },
-        status: { $in: ['pending', 'in-progress'] },
-      });
+      const stats = await this.taskModel.aggregate([
+        {
+          $match: {
+            assignTo: { $in: normalUserIds },
+          },
+        },
+        {
+          $facet: {
+            activeTasksNow: [
+              { $match: { status: { $in: ['pending', 'in-progress'] } } },
+              { $count: 'total' },
+            ],
+            activeTasksPrev: [
+              {
+                $match: {
+                  status: { $in: ['pending', 'in-progress'] },
+                  updatedAt: { $lt: last7Days },
+                },
+              },
+              { $count: 'total' },
+            ],
+            completedThisWeek: [
+              {
+                $match: {
+                  status: 'completed',
+                  updatedAt: { $gte: last7Days },
+                },
+              },
+              { $count: 'total' },
+            ],
+            completedLastWeek: [
+              {
+                $match: {
+                  status: 'completed',
+                  updatedAt: { $gte: prev14Days, $lt: last7Days },
+                },
+              },
+              { $count: 'total' },
+            ],
+          },
+        },
+      ]);
 
-      // ACTIVE TASKS LAST WEEK
-      const activeTasksPrevCount = await this.taskModel.countDocuments({
-        assignTo: { $in: normalUserIds },
-        status: { $in: ['pending', 'in-progress'] },
-        updatedAt: { $lt: last7Days },
-      });
-
-      // COMPLETED THIS WEEK
-      const completedThisWeekCount = await this.taskModel.countDocuments({
-        assignTo: { $in: normalUserIds },
-        status: 'completed',
-        updatedAt: { $gte: last7Days },
-      });
-
-      // COMPLETED LAST WEEK
-      const completedLastWeekCount = await this.taskModel.countDocuments({
-        assignTo: { $in: normalUserIds },
-        status: 'completed',
-        updatedAt: { $gte: prev14Days, $lt: last7Days },
-      });
+      const activeTasksCount = stats[0].activeTasksNow[0]?.total || 0;
+      const activeTasksPrevCount = stats[0].activeTasksPrev[0]?.total || 0;
+      const completedThisWeekCount = stats[0].completedThisWeek[0]?.total || 0;
+      const completedLastWeekCount = stats[0].completedLastWeek[0]?.total || 0;
 
       return {
         totalUsers,
