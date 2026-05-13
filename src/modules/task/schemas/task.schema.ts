@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema, Types } from 'mongoose';
 import { User } from '@modules/account/schemas/user.schema';
-import { AdminUser } from '@modules/admin-user/schemas/admin-user.schema';
 
 export type TaskDocument = Task & Document;
 
@@ -36,10 +35,10 @@ export class Task {
 
   @Prop({
     type: MongooseSchema.Types.ObjectId,
-    ref: 'AdminUser',
+    ref: 'User',
     default: null,
   })
-  assignTo: Types.ObjectId | AdminUser;
+  assignTo: Types.ObjectId | User;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
