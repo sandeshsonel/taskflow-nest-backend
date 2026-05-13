@@ -16,6 +16,10 @@ import { JwtPayload } from '@modules/auth/interfaces/jwt-payload.interface';
 import { TaskKeys } from '@common/constants/validation-messages';
 import { WinstonLoggerService } from '../logger/logger.service';
 
+export interface TaskWithAssignBy extends Task {
+  assignBy?: { fullName?: string } | null;
+}
+
 @Injectable()
 export class TaskService {
   constructor(
@@ -51,12 +55,12 @@ export class TaskService {
     const skip = (page - 1) * limit;
     const userId = user.id;
 
-    let query: any = {};
+    const query: Record<string, unknown> = {};
 
     if (isAdmin) {
-      query = { userId: new Types.ObjectId(userId) };
+      query.userId = new Types.ObjectId(userId);
     } else {
-      query = { assignTo: new Types.ObjectId(userId) };
+      query.assignTo = new Types.ObjectId(userId);
     }
 
     const tasks = await this.taskModel
@@ -64,16 +68,16 @@ export class TaskService {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .lean();
+      .lean<TaskWithAssignBy[]>();
 
     // Look up assignBy if needed (using user's fullName)
     if (!isAdmin) {
-      const userIds = tasks.map((t) => t.userId);
-      const assignByUsers = await this.userModel.find({ _id: { $in: userIds as any[] } }, { fullName: 1 }).lean();
-      const userMap = new Map(assignByUsers.map((u: any) => [u._id.toString(), u]));
+      const userIds = tasks.map((t) => t.userId as Types.ObjectId);
+      const assignByUsers = await this.userModel.find({ _id: { $in: userIds } }, { fullName: 1 }).lean();
+      const userMap = new Map(assignByUsers.map((u) => [String(u._id), u]));
 
       for (const t of tasks) {
-        (t as any).assignBy = userMap.get(t.userId.toString()) || null;
+        t.assignBy = userMap.get(String(t.userId)) || null;
       }
     }
 
@@ -102,7 +106,7 @@ export class TaskService {
         { userId: 1, _id: 0 },
       );
       if (adminTask) {
-        createUserId = (adminTask.userId as any).toString();
+        createUserId = String(adminTask.userId);
       } else {
         throw new BadRequestException(this.i18n.t(TaskKeys.ADMIN_NOT_FOUND));
       }
@@ -151,9 +155,9 @@ export class TaskService {
     }
 
     try {
-      const updateFields: Record<string, any> = { ...updateTaskDto };
-      if (updateFields.assignTo) {
-        updateFields.assignTo = new Types.ObjectId(updateFields.assignTo as string);
+      const updateFields: Record<string, unknown> = { ...updateTaskDto };
+      if (updateTaskDto.assignTo) {
+        updateFields.assignTo = new Types.ObjectId(updateTaskDto.assignTo);
       }
 
       await this.taskModel.findOneAndUpdate(

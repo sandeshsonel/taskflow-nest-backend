@@ -91,7 +91,6 @@ export class BugReportController {
       ],
     },
   })
-  @UsePipes(new ValidationPipe({ transform: true }))
   async createBugReport(
     @Body() createBugReportDto: CreateBugReportDto,
     @UploadedFiles() files: Express.Multer.File[],

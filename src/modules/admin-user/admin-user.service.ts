@@ -119,7 +119,7 @@ export class AdminUserService {
       throw new NotFoundException(this.i18n.t(AdminKeys.USER_NOT_FOUND));
     }
 
-    const updateData: any = { ...updateUserDto };
+    const updateData: Partial<User> = { ...updateUserDto };
     if (updateData.password) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(updateData.password, salt);
@@ -165,14 +165,14 @@ export class AdminUserService {
       const prev14Days = getLastNDays(14);
 
       const users = await this.userModel.find({ adminId });
-      const normalUserIds = users.map((u: any) => u._id);
+      const normalUserIds = users.map((u) => u._id);
 
       const totalUsers = users.length;
       const currentNewSignups = users.filter(
-        (u: any) => u.joinedAt && u.joinedAt >= last7Days,
+        (u) => u.joinedAt && u.joinedAt >= last7Days,
       ).length;
       const previousNewSignups = users.filter(
-        (u: any) =>
+        (u) =>
           u.joinedAt && u.joinedAt >= prev14Days && u.joinedAt < last7Days,
       ).length;
       const usersLastWeek = totalUsers - currentNewSignups;
