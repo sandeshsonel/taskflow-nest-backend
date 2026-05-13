@@ -175,9 +175,7 @@ export class AdminUserService {
         (u: any) =>
           u.joinedAt && u.joinedAt >= prev14Days && u.joinedAt < last7Days,
       ).length;
-      const usersLastWeek = users.filter(
-        (u: any) => u.joinedAt && u.joinedAt < last7Days,
-      ).length;
+      const usersLastWeek = totalUsers - currentNewSignups;
 
       const stats = await this.taskModel.aggregate([
         {
