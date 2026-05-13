@@ -59,19 +59,12 @@ export class TaskController {
     type: Number,
     description: 'Number of items per page',
   })
-  @ApiQuery({
-    name: 'isAdmin',
-    required: false,
-    type: Boolean,
-    description: 'Whether to fetch tasks as an admin',
-  })
   getTaskList(
     @GetUser() user: JwtPayload,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    @Query('isAdmin', new DefaultValuePipe(false), ParseBoolPipe)
-    isAdmin: boolean,
   ) {
+    const isAdmin = user.role === 'admin';
     return this.taskService.getTaskList(user, page, limit, isAdmin);
   }
 
