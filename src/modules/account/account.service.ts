@@ -35,7 +35,7 @@ export class AccountService {
     private jwtService: JwtService,
     private readonly i18n: I18nService,
     private readonly logger: WinstonLoggerService,
-  ) {}
+  ) { }
 
   async signup(createAccountDto: CreateAccountDto) {
     const { name, email, password, role } = createAccountDto;
@@ -248,7 +248,14 @@ export class AccountService {
       return {
         message: this.i18n.t(AccountKeys.SIGNIN_SUCCESS),
         token,
-        user,
+        user: {
+          id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+          createdAt: user.createdAt,
+        },
       };
     } catch (error) {
       if (error instanceof BadRequestException) {
